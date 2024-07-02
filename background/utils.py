@@ -531,6 +531,8 @@ def absorption_action():
     absorption_max_time = (
         config.MaxIdleTime / 2 if config.MaxIdleTime / 2 > 10 else 10
     )  # 最大吸收时间为最大空闲时间的一半或者10秒-取最大值
+    if absorption_max_time <= 10 and (info.inJue or info.inDreamless):
+        absorption_max_time = 20
     last_x = None
     while (
             datetime.now() - start_time
