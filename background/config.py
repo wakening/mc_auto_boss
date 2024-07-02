@@ -15,6 +15,7 @@ from typing import Optional, Dict, List
 
 
 class Config(BaseModel):
+    ModelName: Optional[str] = Field("yolo", title="模型的名称,默认是yolo.onnx") 
     MaxFightTime: int = Field(120, title="最大战斗时间")
     MaxIdleTime: int = Field(10, title="最大空闲时间", ge=5)
     TargetBoss: list[str] = Field([], title="目标关键字")

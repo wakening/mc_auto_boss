@@ -10,8 +10,10 @@ import onnxruntime as rt
 import os
 import numpy as np
 import cv2
+from config import config
 
-model_path = os.path.join(root_path, "models/yolo.onnx")
+
+model_path = os.path.join(root_path, "models/"+config.ModelName+".onnx")
 # 判断能否使用GPU
 if "CUDAExecutionProvider" in rt.get_available_providers():
     provider = ["CUDAExecutionProvider"]
