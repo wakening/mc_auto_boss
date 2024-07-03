@@ -37,7 +37,7 @@ class Config(BaseModel):
         ],
         title="大招释放成功时的技能释放顺序",
     )
-    DungeonWeeklyBossWaitTime: int = Field(5, title="周本(副本)boss等待时间")
+    DungeonWeeklyBossWaitTime: int = Field(0, title="周本(副本)boss额外等待时间")
     DungeonWeeklyBossLevel: int = Field(40, title="周本(副本)boss等级")
     SearchEchoes: bool = Field(False, title="是否搜索声骸")
     OcrInterval: float = Field(0.5, title="OCR间隔时间", ge=0)

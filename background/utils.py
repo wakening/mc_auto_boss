@@ -837,6 +837,7 @@ def boss_wait(bossName):
     keywords_turtle = ["鸣", "钟", "之", "龟"]
     keywords_robot = ["聚", "械", "机", "偶"]
     keywords_dreamless = ["无", "妄", "者"]
+    keywords_jue = ["角"]
 
     def contains_any_combinations(name, keywords, min_chars):  # 为了防止BOSS名重复，添加了最小匹配关键字数
         for r in range(min_chars, len(keywords) + 1):
@@ -852,6 +853,9 @@ def boss_wait(bossName):
         time.sleep(7)
     elif contains_any_combinations(bossName, keywords_dreamless, min_chars=3):
         logger("无妄者需要等待3秒开始战斗！", "DEBUG")
+        time.sleep(3)
+    elif contains_any_combinations(bossName, keywords_jue, min_chars=1):
+        logger("角需要等待3秒开始战斗！", "DEBUG")
         time.sleep(3)
     else:
         logger("当前BOSS可直接开始战斗！", "DEBUG")
