@@ -15,7 +15,7 @@ from typing import Optional, Dict, List
 
 
 class Config(BaseModel):
-    ModelName: Optional[str] = Field("yolo", title="模型的名称,默认是yolo.onnx") 
+    ModelName: Optional[str] = Field("yolo", title="模型的名称,默认是yolo.onnx")
     MaxFightTime: int = Field(120, title="最大战斗时间")
     MaxIdleTime: int = Field(10, title="最大空闲时间", ge=5)
     TargetBoss: list[str] = Field([], title="目标关键字")
@@ -36,6 +36,7 @@ class Config(BaseModel):
         ],
         title="大招释放成功时的技能释放顺序",
     )
+    DungeonWeeklyBossWaitTime: int = Field(5, title="周本(副本)boss等待时间")
     DungeonWeeklyBossLevel: int = Field(40, title="周本(副本)boss等级")
     SearchEchoes: bool = Field(False, title="是否搜索声骸")
     OcrInterval: float = Field(0.5, title="OCR间隔时间", ge=0)
@@ -71,22 +72,23 @@ def open_registry_key(key_path):
         # print(f"未找到注册表路径'{key_path}'")
         pass
     except Exception as e:
-        print(f"访问注册表错误: {e}")  
+        print(f"访问注册表错误: {e}")
     return None
+
 
 def get_wuthering_waves_path():
     key = None
     # 打开注册表项
     # key_path = r"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\KRInstall Wuthering Waves"
-        
+
     key_paths = [
         r"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\KRInstall Wuthering Waves",
         r"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\KRInstall Wuthering Waves Overseas"
-        ]
+    ]
 
     for key_path in key_paths:
         key = open_registry_key(key_path)
-        
+
         if key:
             try:
                 # 读取安装路径
@@ -97,12 +99,12 @@ def get_wuthering_waves_path():
                     # print(f"从注册表中加载到游戏目录：{program_path}")
                     return program_path
             except Exception as e:
-                    # print(f"构建安装路径错误: {e}")
-                    pass
+                # print(f"构建安装路径错误: {e}")
+                pass
             finally:
                 if 'key' in locals():
-                    key.Close()        
-        
+                    key.Close()
+
     return None
 
 
