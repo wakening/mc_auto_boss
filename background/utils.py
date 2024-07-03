@@ -26,7 +26,7 @@ from schema import Position
 from datetime import datetime
 from yolo import search_echoes
 from echo import echo
-
+from auto_yolo_switch import model_boss_yolo
 
 def interactive():
     control.tap("f")
@@ -219,6 +219,7 @@ def transfer_to_boss(bossName):
         control.esc()
         return False
     logger(f"当前目标boss：{bossName}")
+    model_boss_yolo(bossName)
     findBoss = None
     y = 133
     while y < 907:
@@ -312,6 +313,9 @@ def transfer_to_dreamless():
     return False
 
 
+
+
+    
 def transfer() -> bool:
     if config.CharacterHeal:
         check_heal()
@@ -322,6 +326,8 @@ def transfer() -> bool:
             logger("开始治疗")
             time.sleep(1)
     bossName = config.TargetBoss[info.bossIndex % len(config.TargetBoss)]
+
+
     if info.lastBossName == "无妄者" and bossName == "无妄者":
         logger("前往无妄者 且 刚才已经前往过")
         for i in range(15):
