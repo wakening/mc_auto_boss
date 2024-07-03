@@ -136,7 +136,7 @@ def fight_action(positions: dict[str, Position]) -> bool:
     """
     if info.status != Status.fight:
         if (info.inDreamless or info.inJue) and config.DungeonWeeklyBossWaitTime > 0:
-            logger(f"周本副本战斗延迟{config.DreamlessWaitTime}")
+            logger(f"周本副本战斗延迟{config.DungeonWeeklyBossWaitTime}")
             time.sleep(config.DungeonWeeklyBossWaitTime)
         info.fightCount += 1
         info.needAbsorption = True
