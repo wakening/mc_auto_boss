@@ -1013,6 +1013,7 @@ def echo_bag_lock():
         text_result = wait_text_designated_area("灭伤害加成", 1, region, 3)
         if text_result:
             this_echo_main_status = "湮灭伤害加成"
+    this_echo_main_status = remove_non_chinese(this_echo_main_status)
     if config.EchoDebugMode:
         logger(f"当前声骸主词条为：{this_echo_main_status}", "DEBUG")
     if this_echo_main_status is None or this_echo_main_status is False:
@@ -1044,6 +1045,7 @@ def echo_bag_lock():
     region = set_region(1295, 430, 1850, 930)
     text_result = wait_text_designated_area(echo.echoSetName, 2, region, 5)
     this_echo_set = wait_text_result_search(text_result)
+    this_echo_set = remove_non_chinese(this_echo_set)
     if this_echo_set:
         if config.EchoDebugMode:
             logger(f"当前声骸为套装为：{this_echo_set}", "DEBUG")
@@ -1058,6 +1060,7 @@ def echo_bag_lock():
         random_click(1510, 690)
         text_result = wait_text_designated_area(echo.echoSetName, 2, region, 5)
         this_echo_set = wait_text_result_search(text_result)
+        this_echo_set = remove_non_chinese(this_echo_set)
         if this_echo_set:
             if config.EchoDebugMode:
                 logger(f"当前声骸为套装为：{this_echo_set}", "DEBUG")
@@ -1161,6 +1164,13 @@ def echo_next_row(echo_number):
     #     return True
 
 
+def remove_non_chinese(text):
+    if not text:
+        return False
+    # 使用正则表达式匹配汉字，去除所有非汉字字符，包括括号
+    return re.sub(r'[^\u4e00-\u9fff]', '', text)
+
+
 def echo_synthesis():
     """
         : 声骸合成锁定功能
@@ -1207,6 +1217,7 @@ def echo_synthesis():
                 text_result = wait_text_designated_area("灭伤害加成", 1, region, 3)
                 if text_result:
                     this_synthesis_echo_main_status = "湮灭伤害加成"
+            this_synthesis_echo_main_status = remove_non_chinese(this_synthesis_echo_main_status )
             if config.EchoSynthesisDebugMode:
                 logger(f"当前声骸主词条为：{this_synthesis_echo_main_status}", "DEBUG")
             return this_synthesis_echo_main_status
@@ -1226,6 +1237,7 @@ def echo_synthesis():
                     text_result = wait_text_designated_area("灭伤害加成", 1, region, 3)
                     if text_result:
                         this_synthesis_echo_main_status = "湮灭伤害加成"
+                this_synthesis_echo_main_status = remove_non_chinese(this_synthesis_echo_main_status)
                 if config.EchoSynthesisDebugMode:
                     logger(f"当前声骸主词条为：{this_synthesis_echo_main_status}", "DEBUG")
                 return this_synthesis_echo_main_status
@@ -1238,6 +1250,7 @@ def echo_synthesis():
         region = set_region(690, 685, 1250, 945)
         text_result = wait_text_designated_area(echo.echoSetName, 2, region, 5)
         this_synthesis_echo_set = wait_text_result_search(text_result)
+        this_synthesis_echo_set = remove_non_chinese(this_synthesis_echo_set)
         if this_synthesis_echo_set:
             if config.EchoSynthesisDebugMode:
                 logger(f"当前声骸为套装为：{this_synthesis_echo_set}", "DEBUG")
@@ -1252,6 +1265,7 @@ def echo_synthesis():
             random_click(1000, 685)
             text_result = wait_text_designated_area(echo.echoSetName, 2, region, 5)
             this_synthesis_echo_set = wait_text_result_search(text_result)
+            this_synthesis_echo_set = remove_non_chinese(this_synthesis_echo_set)
             if this_synthesis_echo_set:
                 if config.EchoSynthesisDebugMode:
                     logger(f"当前声骸为套装为：{this_synthesis_echo_set}", "DEBUG")
