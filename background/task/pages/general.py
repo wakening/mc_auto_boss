@@ -10,6 +10,35 @@ from . import *
 pages = []
 
 
+# 游戏更新完成后，通过点击退出按钮来重新启动游戏。
+def update_game_exit(positions: dict[str, Position]) -> bool:
+    """
+    更新完成，请重新启动游戏。
+    :param positions: 位置信息
+    :return:
+    """
+    position = positions["退出"]
+    click_position(position)
+    time.sleep(2)
+    return True
+
+
+update_game_exit_page = Page(
+    name="更新完成，请重新启动游戏。",
+    targetTexts=[
+        TextMatch(
+            name="更新完成，请重新启动游戏。",
+            text="更新完成，请重新启动游戏。",
+        ),
+        TextMatch(
+            name="退出",
+            text=template("^退出$"),
+        ),
+    ],
+    action=update_game_exit,
+)
+pages.append(update_game_exit_page)
+
 # 吸收声骸
 def absorption_action(positions: dict[str, Position]) -> bool:
     """
