@@ -10,3 +10,4 @@ onnxruntime-gpu
 paddlepaddle-gpu
 paddleocr
 colorama
+requests
