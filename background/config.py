@@ -17,6 +17,7 @@ from echo import EchoModel
 
 class Config(BaseModel):
     ModelName: Optional[str] = Field("yolo", title="模型的名称,默认是yolo.onnx")
+    DetectionUE4:bool = Field(True, title="是否检测UE4崩溃")
     UE4_POPUP:int = Field(1, title="UE4崩溃弹窗检测间隔时间")
     MaxFightTime: int = Field(120, title="最大战斗时间")
     MaxIdleTime: int = Field(10, title="最大空闲时间", ge=5)
