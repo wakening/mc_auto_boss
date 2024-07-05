@@ -443,6 +443,7 @@ def search_text(results: List[OcrResult], target: str) -> OcrResult | None:
     target = re.sub(
         rf"[{rare_chars}]", ".", target
     )  # 判断 target 是否包含生僻字，如果包含则使用正则将生僻字替换为任意字符
+    #print("\n search的target为(-2)" + str(target)) # 主词条识别失败Debug使用
     for result in results:
         if re.search(target, result.text):  # 使用正则匹配
             return result
@@ -516,7 +517,8 @@ def wait_home(timeout=120):
 
 def turn_to_search() -> int | None:
     x = None
-    for i in range(4):
+    time.sleep(3) # 增加延时以及搜索次数以避免boss死亡连招未结束导致前几轮次搜索不生效(ArcS17)
+    for i in range(5):
         if i == 0:
             control.activate()
             control.mouse_middle()  # 重置视角
@@ -525,7 +527,7 @@ def turn_to_search() -> int | None:
         x = search_echoes(img)
         if x is not None:
             break
-        if i == 3:  # 如果尝试了4次都未发现声骸，直接返回
+        if i == 4:  # 如果尝试了4次都未发现声骸，直接返回
             return
         logger("未发现声骸,转动视角")
         control.tap("a")
@@ -718,6 +720,7 @@ def wait_text_designated_area(targets: str | list[str], timeout: int = 1, region
         img_cropped = np.array(img_pil)
 
         result = ocr(img_cropped)
+        #print("\n ocr(img_cropped)(-1)" + str(result)) # 主词条识别失败Debug使用(-1)
         for target in targets:
             if text_info := search_text(result, target):
                 return text_info
@@ -920,13 +923,13 @@ def echo_bag_lock():
         logger("检测到声骸背包画面，3秒后将开始执行锁定程序，过程中请不要将鼠标移到游戏内。", "DEBUG")
         logger("tips:此功能需要关闭声骸详细描述(即在角色声骸装备处显示详情，在背包内显示简介)", "WARN")
         logger("步骤:点击键盘【C键】打开共鸣者，点击声骸，点击任意声骸，点击右上角简述将开关拨向左边", "WARN")
-        logger("请使用已适配分辨率：\n  1920*1080分辨率1.0缩放\n  1600*900分辨率1.0缩放\n  1280*720分辨率1.5缩放\n 1280*720分辨率1.0缩放", "WARN")
+        logger("请使用已适配分辨率：\n  1920*1080分辨率1.0缩放\n  1600*900分辨率1.0缩放\n  1368*768分辨率1.0缩放\n  1280*720分辨率1.5缩放\n  1280*720分辨率1.0缩放", "WARN")
         time.sleep(3)
         # 切换到时间顺序(倒序)
         logger("切换为时间倒序")
-        random_click(400, 980)
+        random_click(400, 990) # 调整点击位置以适配窗口模式下的1920*1080分辨率(ArcS17)
         time.sleep(1)
-        random_click(400, 845)
+        random_click(400, 860)
         time.sleep(0.5)
         random_click(718, 23)
         time.sleep(0.5)
@@ -1017,11 +1020,20 @@ def echo_bag_lock():
     }
     func, param = cost_mapping[this_echo_cost]
     text_result = wait_text_designated_area(func, param, region, 3)
+    #print("\n wait_text_designated_area(0)" + str(text_result)) # 主词条识别失败Debug使用(ArcS17)
     this_echo_main_status = wait_text_result_search(text_result)
+    #print("\n wait_text_result_search(text_result)(1)" + str(this_echo_main_status)) # 主词条识别失败Debug使用
     if this_echo_main_status is False:
-        text_result = wait_text_designated_area("灭伤害加成", 1, region, 3)
-        if text_result:
-            this_echo_main_status = "湮灭伤害加成"
+        # 增加对衍射伤害及湮灭伤害的识别容错，提供应对其他识别错误的方法并提供便捷的Debug命令(ArcS17)
+        text_result = wait_text_designated_area({'灭伤害加成','射伤害加成'}, 1, region, 3)
+        #print("\n wait_text_designated_area(2)" + str(text_result)) # 主词条识别失败Debug使用
+        if text_result.text == "灭伤害加成":
+            this_echo_main_status = "湮灭伤害加成"  
+        elif text_result.text == "行射伤害加成":
+            this_echo_main_status = "衍射伤害加成"
+        # elif text_result.text == "...":
+        #     this_echo_main_status = "..."
+    #print("\n this_echo_main_status(3)" + str(this_echo_main_status)) # 主词条识别失败Debug使用
     this_echo_main_status = remove_non_chinese(this_echo_main_status)
     if config.EchoDebugMode:
         logger(f"当前声骸主词条为：{this_echo_main_status}", "DEBUG")
@@ -1197,7 +1209,7 @@ def echo_synthesis():
             this_synthesis_echo_cost = "4"
         if this_synthesis_echo_cost is None:
             logger("未能识别到Cost", "ERROR")
-            raise Exception('Cost识别失败，请检查是否使用推荐分辨率：\n  1920*1080分辨率1.0缩放\n  1600*900分辨率1.0缩放\n  1280*720分辨率1.5缩放\n 1280*720分辨率1.0缩放')
+            raise Exception('Cost识别失败，请检查是否使用推荐分辨率：\n  1920*1080分辨率1.0缩放\n  1600*900分辨率1.0缩放\n  1368*768分辨率1.0缩放\n  1280*720分辨率1.5缩放\n  1280*720分辨率1.0缩放')
             # 识别失败返回false将抛出TypeError，在此处提醒使用适配完善的分辨率(ArcS17)
         if config.EchoSynthesisDebugMode:
             logger(f"当前声骸Cost为{this_synthesis_echo_cost}", "DEBUG")
@@ -1223,10 +1235,13 @@ def echo_synthesis():
             func, param = cost_mapping[this_synthesis_echo_cost]
             text_result = wait_text_designated_area(func, param, region, 3)
             this_synthesis_echo_main_status = wait_text_result_search(text_result)
+            #增加对衍射伤害及湮灭伤害的识别容错(ArcS17)
             if this_synthesis_echo_main_status is False:
-                text_result = wait_text_designated_area("灭伤害加成", 1, region, 3)
-                if text_result:
-                    this_synthesis_echo_main_status = "湮灭伤害加成"
+                    text_result = wait_text_designated_area({'灭伤害加成','射伤害加成'}, 1, region, 3)
+                    if text_result.text == "灭伤害加成":
+                        this_synthesis_echo_main_status = "湮灭伤害加成"  
+                    elif text_result.text == "行射伤害加成":
+                        this_synthesis_echo_main_status = "衍射伤害加成"                       
             this_synthesis_echo_main_status = remove_non_chinese(this_synthesis_echo_main_status )
             if config.EchoSynthesisDebugMode:
                 logger(f"当前声骸主词条为：{this_synthesis_echo_main_status}", "DEBUG")
@@ -1244,9 +1259,11 @@ def echo_synthesis():
                 text_result = wait_text_designated_area(func, param, region, 3)
                 this_synthesis_echo_main_status = wait_text_result_search(text_result)
                 if this_synthesis_echo_main_status is False:
-                    text_result = wait_text_designated_area("灭伤害加成", 1, region, 3)
-                    if text_result:
-                        this_synthesis_echo_main_status = "湮灭伤害加成"
+                    text_result = wait_text_designated_area({'灭伤害加成','射伤害加成'}, 1, region, 3)
+                    if text_result.text == "灭伤害加成":
+                        this_synthesis_echo_main_status = "湮灭伤害加成"  
+                    elif text_result.text == "行射伤害加成":
+                        this_synthesis_echo_main_status = "衍射伤害加成" 
                 this_synthesis_echo_main_status = remove_non_chinese(this_synthesis_echo_main_status)
                 if config.EchoSynthesisDebugMode:
                     logger(f"当前声骸主词条为：{this_synthesis_echo_main_status}", "DEBUG")
@@ -1393,7 +1410,7 @@ def echo_synthesis():
         check_synthesis_echo_level_and_quantity(3, results, click_point_list)
     else:
         logger("声骸识别出现问题(2)", "ERROR")
-        logger("\n合成结果识别失败，请检查是否使用推荐分辨率：\n  1920*1080分辨率1.0缩放\n  1600*900分辨率1.0缩放\n  1280*720分辨率1.5缩放\n 1280*720分辨率1.0缩放", "WARN")
+        logger("\n合成结果识别失败，请检查是否使用推荐分辨率：\n  1920*1080分辨率1.0缩放\n  1600*900分辨率1.0缩放\n  1368*768分辨率1.0缩放\n  1280*720分辨率1.5缩放\n  1280*720分辨率1.0缩放", "WARN")
         # 此处提醒使用适配完善的分辨率(ArcS17)
         return False
 
