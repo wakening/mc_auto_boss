@@ -282,10 +282,11 @@ if __name__ == "__main__":
     restart_thread = Process(
         target=restart_app, args=(taskEvent,), name="restart_event"
     )
-     # 创建并启动线程-检查UE4崩溃弹窗
-    find_crash_popup = threading.Thread(target=find_and_press_enter)
-    find_crash_popup.start()
     restart_thread.start()
+    if config.DetectionUE4:
+        # 创建并启动线程-检查UE4崩溃弹窗
+        find_crash_popup = threading.Thread(target=find_and_press_enter)
+        find_crash_popup.start()
     if app_path:
         logger(f"游戏路径：{config.AppPath}")
     else:
