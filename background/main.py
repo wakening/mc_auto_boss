@@ -236,6 +236,7 @@ def on_press(key):
         taskEvent.clear()
         mouseResetEvent.set()
         restart_thread.terminate()
+        find_crash_popup_thread.terminate()
         return False
     return None
 
@@ -285,8 +286,10 @@ if __name__ == "__main__":
     restart_thread.start()
     if config.DetectionUE4:
         # 创建并启动线程-检查UE4崩溃弹窗
-        find_crash_popup = threading.Thread(target=find_and_press_enter)
-        find_crash_popup.start()
+        find_crash_popup_thread = Process(
+        target=find_and_press_enter
+    )
+        find_crash_popup_thread.start()
     if app_path:
         logger(f"游戏路径：{config.AppPath}")
     else:
