@@ -10,7 +10,6 @@ description = "更新"
 # 3.注意：需要安装pyautogui依赖
 # 4.自定义检测UE4崩溃弹窗间隔时间，在config.yaml中进行配置
 
-
 # ver1.0.8
 # update:2024-07-05
 # updated by ArcS17

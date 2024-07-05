@@ -28,13 +28,13 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 hwnds = win32gui.FindWindow("UnrealWindow", "鸣潮")
 app_path = config.AppPath
-IMAGE_NAME = 'message.png' # 崩溃的图片，在项目根目录
+IMAGE_NAME_UE4_CRASH = os.path.join(config.project_root, "message.png") # 崩溃的图片，在项目根目录
 
 # 关闭UE4崩溃弹窗
 def find_and_press_enter():
     while True:
         try:
-            x, y = pyautogui.locateCenterOnScreen(IMAGE_NAME, confidence=0.8)
+            x, y = pyautogui.locateCenterOnScreen(IMAGE_NAME_UE4_CRASH, confidence=0.8)
             if x is not None and y is not None:
                 time.sleep(1)
                 pyautogui.press('enter')
@@ -45,7 +45,7 @@ def restart_app(e: event):
     if app_path:
         while True:
             # 定时重启功能设置已加入config.yaml(ArcS17)
-            if config.ReStartWutheringWavas:
+            if config.ReStartWutheringWaves:
                 time.sleep(config.ReStartWutheringWavasTime)
                 manage_application("UnrealWindow", "鸣潮  ", app_path,e)
             time.sleep(config.GameMonitorTime)  # 每秒检测一次，游戏窗口   改为用户自己设置监控间隔时间，默认为5秒，减少占用(RoseRin)
@@ -163,7 +163,7 @@ def set_console_title(title: str):
 set_console_title(f"鸣潮自动工具ver {version.__version__}   ---此软件为免费的开源软件 谨防倒卖！")
 
 
-def run(task: Task, e: Event):
+def run(task: Task, e: event):
     """
     运行
     :return:
@@ -209,7 +209,7 @@ def on_press(key):
         logger("启动融合脚本")
         try:
             input(
-                "启动融合脚本之前请确保已锁定现有的有用声骸，并确认使用已适配分辨率：\n  1920*1080分辨率1.0缩放\n  1600*900分辨率1.0缩放\n  1280*720分辨率1.5缩放\n 1280*720分辨率1.0缩放"
+                "启动融合脚本之前请确保已锁定现有的有用声骸，并确认使用已适配分辨率：\n  1920*1080分辨率1.0缩放\n  1600*900分辨率1.0缩放\n  1368*768分辨率1.0缩放\n  1280*720分辨率1.5缩放\n  1280*720分辨率1.0缩放\n  回车确认 Enter..."
             )
         except Exception:
             pass
