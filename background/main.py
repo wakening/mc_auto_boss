@@ -1,9 +1,14 @@
 import os
 import init  # !!此导入删除会导致不会将游戏移动到左上角以及提示当前分辨率!!
+import pyautogui
+import time
+import win32api
+import win32con
+import win32gui
+import threading
 import sys
 import version
 import ctypes
-import threading
 from mouse_reset import mouse_reset
 from multiprocessing import Event, Process
 from pynput.keyboard import Key, Listener
@@ -23,7 +28,18 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 hwnds = win32gui.FindWindow("UnrealWindow", "鸣潮")
 app_path = config.AppPath
+IMAGE_NAME = 'message.png' # 崩溃的图片，在项目根目录
 
+# 关闭UE4崩溃弹窗
+def find_and_press_enter():
+    while True:
+        try:
+            x, y = pyautogui.locateCenterOnScreen(IMAGE_NAME, confidence=0.8)
+            if x is not None and y is not None:
+                time.sleep(1)
+                pyautogui.press('enter')
+        except Exception as e:
+            time.sleep(config.UE4_POPUP)
 
 def restart_app(e: event):
     if app_path:
@@ -33,24 +49,7 @@ def restart_app(e: event):
                 time.sleep(config.ReStartWutheringWavasTime)
                 manage_application("UnrealWindow", "鸣潮  ", app_path,e)
             time.sleep(config.GameMonitorTime)  # 每秒检测一次，游戏窗口   改为用户自己设置监控间隔时间，默认为5秒，减少占用(RoseRin)
-            find_ue4("UnrealWindow", "UE4-Client Game已崩溃  ")
             find_game_windows("UnrealWindow", "鸣潮  ", e)
-            
-
-
-def find_ue4(class_name, window_title):
-    if app_path:
-        ue4windows = win32gui.FindWindow(class_name, window_title)
-        if ue4windows != 0:  # 检测到游戏发生崩溃-UE4弹窗
-            logger("UE4-Client Game已崩溃，尝试重启游戏......")
-            win32gui.SendMessage(ue4windows, win32con.WM_CLOSE, 0, 0)
-            # 等待崩溃窗口关闭
-            time.sleep(2)
-            if win32gui.FindWindow(class_name, window_title) == 0:
-                return True
-        else:
-            return False
-
 
 def find_game_windows(class_name, window_title, taskEvent):
     if app_path:
@@ -259,6 +258,9 @@ if __name__ == "__main__":
     restart_thread = Process(
         target=restart_app, args=(taskEvent,), name="restart_event"
     )
+     # 创建并启动线程-检查UE4崩溃弹窗
+    find_crash_popup = threading.Thread(target=find_and_press_enter)
+    find_crash_popup.start()
     restart_thread.start()
     if app_path:
         logger(f"游戏路径：{config.AppPath}")
