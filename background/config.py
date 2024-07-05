@@ -17,6 +17,7 @@ from echo import EchoModel
 
 class Config(BaseModel):
     ModelName: Optional[str] = Field("yolo", title="模型的名称,默认是yolo.onnx")
+    DetectionUE4:bool = Field(True, title="是否检测UE4崩溃")
     UE4_POPUP:int = Field(1, title="UE4崩溃弹窗检测间隔时间")
     MaxFightTime: int = Field(120, title="最大战斗时间")
     MaxIdleTime: int = Field(10, title="最大空闲时间", ge=5)
@@ -48,8 +49,8 @@ class Config(BaseModel):
     EchoLock: bool = Field(False, title="是否启用锁定声骸功能")
     EchoLockConfig: Dict[str, Dict[str, List[str]]] = Field(default_factory=dict)
     EchoMaxContinuousLockQuantity: int = Field(5, title="最大连续检测到已锁定声骸的数量")
-    ReStartWutheringWaves: bool = Field(False, title="为避免游戏卡10%、75%等特殊进度定时重启游戏的开关")
-    ReStartWutheringWavesTime: int = Field(10800, title="游戏自动重启间隔时间")
+    RestartWutheringWaves: bool = Field(False, title="定时重启游戏以避免游戏卡10%、75%等特殊进度")
+    RestartWutheringWavesTime: int = Field(7200, title="游戏自动重启间隔时间")
     RebootScreenshot: bool = Field(False, title="是否在游戏窗口存在但截取图像失败后重启")
     RebootCount: int = Field(0, title="截取窗口失败次数")
     GameMonitorTime: int = Field(5, title="游戏窗口检测间隔时间")
