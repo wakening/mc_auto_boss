@@ -1477,3 +1477,52 @@ def adapts():
             else:
                 info.adaptsType = 4
                 info.adaptsResolution = "_1280_720"
+
+
+# 监测游戏是否卡加载，长时间卡在加载界面就干掉游戏进程
+def anti_stuck_monitor(img, anti_stuck_list: list, last_timestamp: int) -> int | None:
+    now_timestamp = int(time.time())
+    # 隔一段时间(秒)收集一次
+    if now_timestamp - last_timestamp < 20:
+        return None
+    if img is None:
+        anti_stuck_list.clear()
+        return None
+    height, width, channels = img.shape
+    # 裁右下角，避开UID
+    region = (int(width * 0.89), int(height * 0.87), int(width * 0.98), int(height * 0.96))
+    img_pil = Image.fromarray(img).crop(region)
+    stuck_img = np.array(img_pil)
+    result = ocr(stuck_img)
+    text_ocr_result = None
+    if result is not None and len(result) > 0:
+        text_ocr_result = search_text(result, "^\\d{1,3}\\s*%$")
+    # 需要一段时间内连续检出正在加载中，且加载值不变，才断定为卡加载
+    # 所以检查到有非加载中状态，说明这段时间没有卡死，就清空检查队列
+    if text_ocr_result is None:
+        anti_stuck_list.clear()
+        return now_timestamp
+    percent_str = text_ocr_result.text.replace(" ", "").replace("%", "")
+    anti_stuck_list.append((now_timestamp, int(percent_str)))
+    # 没攒够先不检测
+    if len(anti_stuck_list) < 9:
+        return now_timestamp
+    recent_timestamp = 0
+    last_timestamp = 0
+    last_percent = 0
+    is_stuck = True
+    for i in range(len(anti_stuck_list)):
+        timestamp, percent = anti_stuck_list[i]
+        if i > 0:
+            recent_timestamp = timestamp
+            is_stuck &= last_percent == percent
+        elif i == 0:
+            last_timestamp = timestamp
+            last_percent = percent
+    anti_stuck_list.clear()
+    # 加载进度有不同值，说明没卡死
+    if not is_stuck:
+        return now_timestamp
+    logger(f"监测到游戏在{recent_timestamp - last_timestamp}s内连续卡在进度{last_percent}%, 关闭游戏", "WARN")
+    win32gui.SendMessage(hwnd, win32con.WM_CLOSE, 0, 0)
+    return now_timestamp

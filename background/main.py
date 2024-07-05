@@ -37,7 +37,6 @@ def restart_app(e: event):
             find_game_windows("UnrealWindow", "鸣潮  ", e)
             
 
-
 def find_ue4(class_name, window_title):
     if app_path:
         ue4windows = win32gui.FindWindow(class_name, window_title)
@@ -161,10 +160,20 @@ def run(task: Task, e: Event):
         logger("任务进程已经在运行，不需要再次启动")
         return
     e.set()
+
+    logger("卡加载监测启动")
+    anti_stuck_list = []
+    last_timestamp = int(time.time())
+
     while e.is_set():
         img = screenshot()
         result = ocr(img)
         task(img, result)
+
+        # 监测游戏是否卡加载，长时间卡在加载界面就干掉游戏进程
+        check_timestamp = anti_stuck_monitor(img, anti_stuck_list, last_timestamp)
+        if check_timestamp is not None:
+            last_timestamp = check_timestamp
     logger("进程停止运行")
 
 
