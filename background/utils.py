@@ -1356,7 +1356,7 @@ def echo_synthesis():
     purple = (255, 172, 255)
     gold = (255, 239, 171)
     results = []
-    print(results) # Debug使用
+    #print(results) # Debug使用
     img = screenshot()
     for point in check_point_list:
         result = contrast_colors(point, purple, 0.85, False, img)
