@@ -321,25 +321,27 @@ def login_action(positions: dict[str, Position]) -> bool:
     try:
         # 调用find_text函数，传入字符串"点击"，将返回值赋给result变量
         result = find_text("点击")
-        # 循环3次点击文字
-        for i in range(3):
-            # 调用click_position函数，传入result.position作为参数
-            click_position(result.position)
-            # 暂停0.4秒
-            time.sleep(0.4)
+        if result is not None:
+            # 循环3次点击文字
+            for i in range(3):
+                # 调用click_position函数，传入result.position作为参数
+                click_position(result.position)
+                # 暂停0.4秒
+                time.sleep(0.4)
     # 如果在try语句块中发生异常，执行except语句块中的代码
     except Exception as e:
         # 打印异常信息
         print(f"发生异常： {e}")
         # 继续点击文字"点击连接"
         result = find_text("点击")
-        # 循环3次点击文字
-        for i in range(3):
-            # 调用click_position函数，传入result.position作为参数
-            click_position(result.position)
-            # 暂停0.4秒
-            time.sleep(0.4)
-        # 返回False
+        if result is not None:
+            # 循环3次点击文字
+            for i in range(3):
+                # 调用click_position函数，传入result.position作为参数
+                click_position(result.position)
+                # 暂停0.4秒
+                time.sleep(0.4)
+            # 返回False
         return False
     # 如果没有发生异常，返回True
     return True
