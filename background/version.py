@@ -1,6 +1,11 @@
-__version__ = "1.0.8"
+__version__ = "1.0.9"
 release_date = "2024-07-05"
 description = "更新"
+
+# ver1.0.9
+# update:2024-07-05
+# updated by wang115t
+# 1.游戏更新完成后，通过点击退出按钮来重新启动游戏。
 
 # ver1.0.8
 # update:2024-07-05
