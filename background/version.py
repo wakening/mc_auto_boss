@@ -6,6 +6,10 @@ description = "更新"
 # update:2024-07-05
 # updated by wang115t
 # 1.游戏更新完成后，通过点击退出按钮来重新启动游戏。
+# 2.新增UE4弹窗崩溃后，自动重启游戏。
+# 3.注意：需要安装pyautogui依赖
+# 4.自定义检测UE4崩溃弹窗间隔时间，在config.yaml中进行配置
+
 
 # ver1.0.8
 # update:2024-07-05
