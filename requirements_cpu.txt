@@ -11,3 +11,4 @@ paddlepaddle
 paddleocr
 colorama
 requests
+pyautogui
