@@ -157,6 +157,4 @@ test.*.py
 favicon.ico
 dist
 py310
-echo_config.yaml
-isCrashes.txt
-mc_log.txt
+
