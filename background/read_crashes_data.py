@@ -12,7 +12,9 @@ def get_crashes_value():
             lines = f.readlines()
 
         for line in reversed(lines):
-            match = re.search(r"战斗次数：(\d+) 吸收次数：(\d+)(?: 治疗次数：(\d+))?", line)
+            match = re.search(
+                r"战斗次数：(\d+) 吸收次数：(\d+)(?: 治疗次数：(\d+))?", line
+            )
 
             if match:
                 battle_count = int(match.group(1))
@@ -24,9 +26,12 @@ def get_crashes_value():
                     is_crashes_file = os.path.join(config.project_root, "isCrashes.txt")
                     with open(is_crashes_file, "w") as f:
                         f.write(str(False))
-                    return 0,0,0
-                    # 如果并未使用战斗脚本但游戏发生崩溃或战斗次数统计出错，此时无返回值将导致TypeError: cannot unpack non-iterable NoneType object
-                    # 故返回0,0,0并重新赋值False以重置崩溃状态(ArcS17)
+                    return 0, 0, 0
+    return 0, 0, 0
+    # 如果并未使用战斗脚本但游戏发生崩溃或战斗次数统计出错，此时无返回值将导致TypeError: cannot unpack non-iterable NoneType object
+    # 故返回0,0,0并重新赋值False以重置崩溃状态(ArcS17)
+
+
 # battle_count, absorb_count, heal_count = getCrashesValue()
 # print(f"最近的战斗次数：{battle_count}，吸取次数：{absorb_count}，治疗次数：{heal_count}")
 
@@ -42,7 +47,9 @@ def is_app_crashes():
             elif content == "False":
                 value = False
             else:
-                os.remove(is_crashes_file) # isCrashes文件存在但内容非法，删除文件并返回False，避免用户修改造成Exception
+                os.remove(
+                    is_crashes_file
+                )  # isCrashes文件存在但内容非法，删除文件并返回False，避免用户修改造成Exception
                 return False
         return value
     elif not os.path.exists(is_crashes_file):
@@ -61,14 +68,14 @@ def is_app_crashes():
 # 这段代码的功能是检查一个名为 "isCrashes.txt" 的文件是否存在于项目的根目录下。
 # 如果文件存在，它会读取文件内容并判断是否为 "True" 或 "False"。
 # 如果文件不存在，它会创建一个新文件并写入 "True 或者 False，通过isFileExist_TORF传入"。
-def is_app_crashes_init(isFileExist_TORF:bool):
+def is_app_crashes_init(isFileExist_TORF: bool):
     is_crashes_file = os.path.join(config.project_root, "isCrashes.txt")
     if os.path.exists(is_crashes_file):
         with open(is_crashes_file, "r") as f:
             content = f.read().strip()  # 读取文件内容并去除首尾空格
             if content == "True":
-              with open(is_crashes_file, "w") as f:
-                f.write(str(False))
+                with open(is_crashes_file, "w") as f:
+                    f.write(str(False))
             # elif content == "False":
             #   with open(is_crashes_file, "w") as f:
             #     f.write(str(True))
@@ -84,7 +91,9 @@ def is_app_crashes_init(isFileExist_TORF:bool):
 def read_crashes_datas():
     is_crashes = is_app_crashes()
     if is_crashes:  # 游戏发生了崩溃-读取文本-True
-        battle_count, absorb_count, heal_count = get_crashes_value()  # 读取崩溃后日志中保存的数据，作为日志输出
+        battle_count, absorb_count, heal_count = (
+            get_crashes_value()
+        )  # 读取崩溃后日志中保存的数据，作为日志输出
         return battle_count, absorb_count, heal_count
         # info.fightCount = battle_count # 战斗次数
         # info.absorptionCount = absorb_count # 吸收次数
@@ -95,4 +104,6 @@ def read_crashes_datas():
         absorb_count = 0
         heal_count = 0
         return battle_count, absorb_count, heal_count
+
+
 # readCrashesData()
