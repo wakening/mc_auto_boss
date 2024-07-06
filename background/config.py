@@ -32,7 +32,7 @@ class Config(BaseModel):
     RebootCount: int = Field(0, title="截取窗口失败次数")
     DetectionUE4:bool = Field(True, title="是否检测UE4崩溃")
     ISLoadingJue :bool = Field(False, title="角副本卡加载检测开关")
-    IsLoadingJueTime:int = Field(10, title="角卡加载检测时长")
+    IsLoadingJueTime:int = Field(8, title="角卡加载检测时长")
     UE4_POPUP:int = Field(30, title="UE4崩溃弹窗检测间隔时间")
 
     # 控制台信息
