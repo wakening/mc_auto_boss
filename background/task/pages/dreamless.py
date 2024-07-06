@@ -11,6 +11,8 @@ import time
 from . import *
 from datetime import timedelta
 
+#防止卡加载
+import is_loading
 pages = []
 
 
@@ -203,7 +205,11 @@ def confirm_leave_action(positions: dict[str, Position]) -> bool:
     :return:
     """
     click_position(positions["确认"])
-    time.sleep(3)
+    time.sleep(1)
+    if is_loading.check_results(): #检测到卡加载界面
+        #关闭鸣潮弹窗
+        close_window("UnrealWindow", "鸣潮  ")
+
     wait_home()
     logger(f"{info.lastBossName}副本结束")
     time.sleep(2)
