@@ -546,8 +546,8 @@ def absorption_action():
         return
     start_time = datetime.now()  # 开始时间
     absorption_max_time = (
-        config.MaxIdleTime / 2 if config.MaxIdleTime / 2 > 10 else 10
-    )  # 最大吸收时间为最大空闲时间的一半或者10秒-取最大值
+        config.MaxIdleTime / 2 if config.MaxIdleTime / 2 > config.MaxSearchEchoesTime else config.MaxSearchEchoesTime
+    )  # 最大吸收时间为最大空闲时间的一半与设定MaxSearchEchoesTime取较大值
     if absorption_max_time <= 10 and (info.inJue or info.inDreamless):
         absorption_max_time = 20
     last_x = None
@@ -572,7 +572,7 @@ def absorption_action():
             control.tap("d")
         else:
             logger("发现声骸 向前移动")
-            for i in range(5):
+            for i in range(4):
                 forward()
                 time.sleep(0.1)
         if absorption_and_receive_rewards({}):

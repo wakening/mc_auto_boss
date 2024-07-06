@@ -16,15 +16,46 @@ from echo import EchoModel
 
 
 class Config(BaseModel):
+
+    # 脚本基础配置
+    AppPath: Optional[str] = Field(None, title="游戏路径")
     ModelName: Optional[str] = Field("yolo", title="模型的名称,默认是yolo.onnx")
+    OcrInterval: float = Field(0.5, title="OCR间隔时间", ge=0)
+    GameMonitorTime: int = Field(5, title="游戏窗口检测间隔时间")
+    project_root: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    LogFilePath: Optional[str] = Field(None, title="日志文件路径")
+
+    # 游戏崩溃捕获及处理
+    RebootScreenshot: bool = Field(False, title="是否在游戏窗口存在但截取图像失败后重启")
+    RestartWutheringWaves: bool = Field(False, title="定时重启游戏以避免游戏卡10%、75%等特殊进度")
+    RestartWutheringWavesTime: int = Field(7200, title="游戏自动重启间隔时间")
+    RebootCount: int = Field(0, title="截取窗口失败次数")
     DetectionUE4:bool = Field(True, title="是否检测UE4崩溃")
     ISLoadingJue :bool = Field(False, title="角副本卡加载检测开关")
     IsLoadingJueTime:int = Field(10, title="角卡加载检测时长")
-    UE4_POPUP:int = Field(1, title="UE4崩溃弹窗检测间隔时间")
+    UE4_POPUP:int = Field(30, title="UE4崩溃弹窗检测间隔时间")
+
+    # 控制台信息
+    EchoDebugMode: bool = Field(True, title="声骸锁定功能DEBUG显示输出的开关")
+    EchoSynthesisDebugMode: bool = Field(True, title="声骸合成锁定功能DEBUG显示输出的开关")
+
+    # 自动战斗及声骸锁定配置
     MaxFightTime: int = Field(120, title="最大战斗时间")
     MaxIdleTime: int = Field(10, title="最大空闲时间", ge=5)
-    TargetBoss: list[str] = Field([], title="目标关键字")
+    MaxSearchEchoesTime: int = Field(18, title="最大搜索声骸时间")
     SelectRoleInterval: int = Field(2, title="选择角色间隔时间", ge=2)
+    DungeonWeeklyBossWaitTime: int = Field(0, title="周本(副本)boss额外等待时间")
+    DungeonWeeklyBossLevel: int = Field(40, title="周本(副本)boss等级")
+    SearchEchoes: bool = Field(False, title="是否搜索声骸")
+    SearchDreamlessEchoes: bool = Field(True, title="是否搜索无妄者")
+    CharacterHeal: bool = Field(True, title="是否判断角色是否阵亡")
+    WaitUltAnimation: bool = Field(False, title="是否等待大招时间")
+    EchoLock: bool = Field(False, title="是否启用锁定声骸功能")
+    EchoLockConfig: Dict[str, Dict[str, List[str]]] = Field(default_factory=dict)
+    EchoMaxContinuousLockQuantity: int = Field(5, title="最大连续检测到已锁定声骸的数量")
+
+    # 战斗策略
+    TargetBoss: list[str] = Field([], title="目标关键字")
     FightTactics: list[str] = Field(
         [
             "e,q,r,a,0.1,a,0.1,a,0.1,a,0.1,a,0.1",
@@ -41,29 +72,7 @@ class Config(BaseModel):
         ],
         title="大招释放成功时的技能释放顺序",
     )
-    DungeonWeeklyBossWaitTime: int = Field(0, title="周本(副本)boss额外等待时间")
-    DungeonWeeklyBossLevel: int = Field(40, title="周本(副本)boss等级")
-    SearchEchoes: bool = Field(False, title="是否搜索声骸")
-    OcrInterval: float = Field(0.5, title="OCR间隔时间", ge=0)
-    SearchDreamlessEchoes: bool = Field(True, title="是否搜索无妄者")
-    CharacterHeal: bool = Field(True, title="是否判断角色是否阵亡")
-    WaitUltAnimation: bool = Field(False, title="是否等待大招时间")
-    EchoLock: bool = Field(False, title="是否启用锁定声骸功能")
-    EchoLockConfig: Dict[str, Dict[str, List[str]]] = Field(default_factory=dict)
-    EchoMaxContinuousLockQuantity: int = Field(5, title="最大连续检测到已锁定声骸的数量")
-    RestartWutheringWaves: bool = Field(False, title="定时重启游戏以避免游戏卡10%、75%等特殊进度")
-    RestartWutheringWavesTime: int = Field(7200, title="游戏自动重启间隔时间")
-    RebootScreenshot: bool = Field(False, title="是否在游戏窗口存在但截取图像失败后重启")
-    RebootCount: int = Field(0, title="截取窗口失败次数")
-    GameMonitorTime: int = Field(5, title="游戏窗口检测间隔时间")
-    EchoDebugMode: bool = Field(True, title="声骸锁定功能DEBUG显示输出的开关")
-    EchoSynthesisDebugMode: bool = Field(True, title="声骸合成锁定功能DEBUG显示输出的开关")
 
-    # 获取项目根目录
-    project_root: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    LogFilePath: Optional[str] = Field(None, title="日志文件路径")
-
-    AppPath: Optional[str] = Field(None, title="游戏路径")
 
     def __init__(self, **data):
         super().__init__(**data)
