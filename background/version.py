@@ -1,7 +1,11 @@
-__version__ = "1.1.0"
-release_date = "2024-07-06"
+__version__ = "1.2.0"
+release_date = "2024-07-07"
 description = "更新"
 
+# ver1.2.0
+# update:2024-07-07
+# updated by wang115t
+# 1.重构代码，角脚本卡加载后，自动重启游戏的功能
 
 # ver1.1.0
 # update:2024-07-06
