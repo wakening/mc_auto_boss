@@ -1,24 +1,27 @@
-ModelName: "yolo" # 默认无需设置，已实现自动匹配模型
-DetectionUE4: True # 是否检测UE4崩溃窗口，推荐开启True 
-UE4_POPUP: 30 # UE4崩溃窗口检测，间隔时间，默认30秒检测一次
-ISLoadingJue: False #角副本卡加载检测开关"
-isLoading_Jue_time: 10  # 角卡加载检测时长:默认10秒，调高会影响效率"
+# 脚本基础配置
 AppPath: # 游戏路径，如需设置，使用"\\"而不是"\" ,留空为从注册表读取游戏运行目录，无法读取注册表，且此值为空时无法在崩溃时自动重启游戏。
 ModelName: "yolo" # 默认无需设置，已实现自动匹配声骸模型
 OcrInterval: 0 # OCR识别间隔时间
 GameMonitorTime: 5 # 游戏窗口检测间隔时间
 LogFilePath: # 日志保存路径，留空即为项目根目录，如需设置，则需为"c:\\mc_log.txt"格式，使用"\\"而不是"\"
 
-#游戏崩溃捕获及处理
+# 游戏崩溃捕获及处理
 RebootScreenshot: false # 是否在游戏窗口存在但截取失败后重启
 RestartWutheringWaves: false # 定时重启游戏以避免游戏卡10%、75%等特殊进度及UE4崩溃，与DetectionUE4开启任一
 RestartWutheringWavesTime: 7200 # 单位为秒，如7200秒且RestartWutheringWaves为True即两小时重启一次
 DetectionUE4: True # 是否检测UE4崩溃窗口，推荐开启True 
 UE4_POPUP: 30 # UE4崩溃窗口检测的间隔时间，默认30秒检测一次
+ISLoadingJue: False #角副本卡加载检测开关"
+isLoading_Jue_time: 10  # 角卡加载检测时长:默认10秒，调高会影响检测效率
 
-#自动战斗及声骸锁定配置
+# 控制台信息
+EchoDebugMode: true #声骸锁定功能DEBUG显示输出的开关
+EchoSynthesisDebugMode: true # 声骸合成锁定功能DEBUG显示输出的开关
+
+# 自动战斗及声骸锁定配置
 MaxFightTime: 120 # 单次战斗最大时间 超过时间会进行下一个目标
 MaxIdleTime: 10 # 战斗完成后的空闲时间，不能小于5
+MaxSearchEchoesTime: 18 # 战斗完成后搜索声骸的最大时间，与MaxIdleTime/2 取较大值
 SelectRoleInterval: 2 # 选择角色的时间间隔 最小为2 避免无法选择角色
 DungeonWeeklyBossLevel: 40 # 自己可以掉落的周本(副本)boss最低等级（当前索拉等级*10）
 DungeonWeeklyBossWaitTime: 0 # (副本)boss进入以后额外等待时间
@@ -29,11 +32,8 @@ SearchDreamlessEchoes: true # 是否搜索无妄者声骸
 EchoLock: false #是否启用声骸锁定功能
 EchoMaxContinuousLockQuantity: 5 # 最大连续检测到已锁定声骸的数量，超过此数量就停止
 
-#控制台信息
-EchoDebugMode: true #声骸锁定功能DEBUG显示输出的开关
-EchoSynthesisDebugMode: true # 声骸合成锁定功能DEBUG显示输出的开关
-
-FightTactics: # 战斗策略 三个角色的释放技能顺序, 逗号分隔, e,q,r为技能, a为普攻(默认连点0.3秒), 数字为间隔时间,a~0.5为普攻按下0.5秒,a(0.5)为连续普攻0.5秒，摩托车短按请用q~0.1
+# 战斗策略
+FightTactics: # 三个角色的释放技能顺序, 逗号分隔, e,q,r为技能, a为普攻(默认连点0.3秒), 数字为间隔时间,a~0.5为普攻按下0.5秒,a(0.5)为连续普攻0.5秒，摩托车短按请用q~0.1
     - "a,r,q,a(2),f,e,a(1),e,a(1),e,a(1),0.05,f,a~0.8"   # 卡卡罗
     - "a,r,q~0.1,a(2),f,e,0.05,a~0.7"   #安可
     - "a,f,e,f,q,f,r,f,s,0.2,a(1)"      #维里奈

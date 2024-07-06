@@ -8,7 +8,7 @@ import win32con
 import random  # 导入random模块，用于生成随机数
 from concurrent.futures import ThreadPoolExecutor, as_completed  # 导入ThreadPoolExecutor和as_completed，用于并发执行任务
 from config import config
-folder_path = os.path.join(config.project_root, "./isLoading") # # 指定加载图片文件夹路径
+folder_path = os.path.join(config.project_root, "./isLoading") # 指定加载图片文件夹路径
 
 def capture_window(hwnd):
     # 捕获指定窗口的屏幕截图
@@ -59,10 +59,6 @@ def get_image_paths(folder_path):
             if any(file.endswith(ext) for ext in image_extensions):
                 image_paths.append(os.path.join(root, file))
     return image_paths
-
-
-
-
 
 
 def check_results():
