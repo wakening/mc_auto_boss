@@ -34,7 +34,7 @@ def find_similarity(img_name):
     # project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # 获取项目根目录
     reference_image = cv2.imread(img_name)  # 读取参考图片
     count = 0  # 初始化相似计数器
-    detection_count = 30  # 30秒内，每秒检测1次
+    detection_count = config.IsLoadingJueTime  # 默认10秒内，每秒检测1次
     for i in range(detection_count):
         current_image = capture_window(hwnd)  # 捕获当前窗口截图
         similarity = compare_images(reference_image, current_image)  # 比较参考图片和当前截图的相似度
