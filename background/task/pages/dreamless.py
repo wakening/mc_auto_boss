@@ -13,6 +13,7 @@ from datetime import timedelta
 
 #防止卡加载
 import is_loading
+from config import config
 pages = []
 
 
@@ -206,9 +207,10 @@ def confirm_leave_action(positions: dict[str, Position]) -> bool:
     """
     click_position(positions["确认"])
     time.sleep(1)
-    if is_loading.check_results(): #检测到卡加载界面
-        #关闭鸣潮弹窗
-        close_window("UnrealWindow", "鸣潮  ")
+    if config.ISLoadingJue:
+        if is_loading.check_results(): #检测到卡加载界面
+            #关闭鸣潮弹窗
+            is_loading.close_window("UnrealWindow", "鸣潮  ")
 
     wait_home()
     logger(f"{info.lastBossName}副本结束")
