@@ -572,7 +572,9 @@ def absorption_action():
             control.tap("d")
         else:
             logger("发现声骸 向前移动")
-            control.tap("w")
+            for i in range(5):
+                forward()
+                time.sleep(0.1)
         if absorption_and_receive_rewards({}):
             break
 
@@ -905,9 +907,11 @@ def set_region(x_upper_left: int = None, y_upper_left: int = None, x_lower_right
 
 
 def echo_bag_lock():
+    is_echo_ebug = False # Debug打印开关
     adapts()
     """
     声骸锁定
+    param is_echo_ebug 用于声骸识别过程Debug
     """
     # 开始执行判断
     if not config.EchoLock:
@@ -1020,20 +1024,20 @@ def echo_bag_lock():
     }
     func, param = cost_mapping[this_echo_cost]
     text_result = wait_text_designated_area(func, param, region, 3)
-    #print("\n wait_text_designated_area(0)" + str(text_result)) # 主词条识别失败Debug使用(ArcS17)
+    if is_echo_ebug: print("\n wait_text_designated_area(0)" + str(text_result)) # 主词条识别失败Debug使用
     this_echo_main_status = wait_text_result_search(text_result)
-    #print("\n wait_text_result_search(text_result)(1)" + str(this_echo_main_status)) # 主词条识别失败Debug使用
+    if is_echo_ebug: print("\n wait_text_result_search(text_result)(1)" + str(this_echo_main_status)) # 主词条识别失败Debug使用
     if this_echo_main_status is False:
-        # 增加对衍射伤害及湮灭伤害的识别容错，提供应对其他识别错误的方法并提供便捷的Debug命令(ArcS17)
+        # 增加对衍射伤害及湮灭伤害的识别容错
         text_result = wait_text_designated_area({'灭伤害加成','射伤害加成'}, 1, region, 3)
-        #print("\n wait_text_designated_area(2)" + str(text_result)) # 主词条识别失败Debug使用
+        if is_echo_ebug: print("\n wait_text_designated_area(2)" + str(text_result)) # 主词条识别失败Debug使用
         if text_result.text == "灭伤害加成":
             this_echo_main_status = "湮灭伤害加成"  
         elif text_result.text == "行射伤害加成":
             this_echo_main_status = "衍射伤害加成"
         # elif text_result.text == "...":
         #     this_echo_main_status = "..."
-    #print("\n this_echo_main_status(3)" + str(this_echo_main_status)) # 主词条识别失败Debug使用
+    if is_echo_ebug: print("\n this_echo_main_status(3)" + str(this_echo_main_status)) # 主词条识别失败Debug使用
     this_echo_main_status = remove_non_chinese(this_echo_main_status)
     if config.EchoDebugMode:
         logger(f"当前声骸主词条为：{this_echo_main_status}", "DEBUG")
@@ -1198,6 +1202,7 @@ def echo_synthesis():
         : update: 2024/06/26 16:16:00
         : author: RoseRin0
     """
+    is_synthesis_debug = False # Debug打印开关
     def check_echo_cost():
         this_synthesis_echo_cost = None
         cost_img = screenshot()
@@ -1234,14 +1239,18 @@ def echo_synthesis():
         if this_synthesis_echo_cost in cost_mapping:
             func, param = cost_mapping[this_synthesis_echo_cost]
             text_result = wait_text_designated_area(func, param, region, 3)
+            if is_synthesis_debug: print("\n wait_text_designated_area(0)" + str(text_result)) # 主词条识别失败Debug使用
             this_synthesis_echo_main_status = wait_text_result_search(text_result)
-            #增加对衍射伤害及湮灭伤害的识别容错(ArcS17)
+            if is_synthesis_debug: print("\n wait_text_result_search(text_result)(1)" + str(this_synthesis_echo_main_status)) # 主词条识别失败Debug使用
+            #增加对衍射伤害及湮灭伤害的识别容错
             if this_synthesis_echo_main_status is False:
                     text_result = wait_text_designated_area({'灭伤害加成','射伤害加成'}, 1, region, 3)
+                    if is_synthesis_debug: print("\n wait_text_designated_area(2)" + str(text_result)) # 主词条识别失败Debug使用
                     if text_result.text == "灭伤害加成":
                         this_synthesis_echo_main_status = "湮灭伤害加成"  
                     elif text_result.text == "行射伤害加成":
-                        this_synthesis_echo_main_status = "衍射伤害加成"                       
+                        this_synthesis_echo_main_status = "衍射伤害加成"  
+                    if is_synthesis_debug: print("\n this_echo_main_status(3)" + str(this_synthesis_echo_main_status)) # 主词条识别失败Debug使用                   
             this_synthesis_echo_main_status = remove_non_chinese(this_synthesis_echo_main_status )
             if config.EchoSynthesisDebugMode:
                 logger(f"当前声骸主词条为：{this_synthesis_echo_main_status}", "DEBUG")
