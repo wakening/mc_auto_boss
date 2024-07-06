@@ -42,7 +42,7 @@ def find_similarity(img_name):
             count += 1
         time.sleep(1)
     threshold = round(detection_count * 0.75)  # 设置相似度阈值
-    if count > threshold:
+    if count >= threshold:
         return True
     else:
         return False
