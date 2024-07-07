@@ -23,6 +23,7 @@
 5. 请将设置界面中控制选项下的 `镜头重置` 打开！
 ![1717844361594.png](https://hermes981128.oss-cn-shanghai.aliyuncs.com/ImageBed/1717844361594.png)
 6. [推荐游戏设置](https://github.com/lazydog28/mc_auto_boss/wiki/%E6%8E%A8%E8%8D%90%E6%B8%B8%E6%88%8F%E8%AE%BE%E7%BD%AE)（如果运行有问题，请确保游戏内的设置与推荐游戏设置一致）
+7. 请确保背包里面至少有一个复活药剂，`是否判断角色是否阵亡`功能是通过检查药剂使用弹窗实现，无任何药剂则不会有弹窗！
 
 ## 使用方法
 
