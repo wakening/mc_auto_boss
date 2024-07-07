@@ -11,8 +11,8 @@ RestartWutheringWaves: false # 定时重启游戏以避免游戏卡10%、75%等�
 RestartWutheringWavesTime: 7200 # 单位为秒，如7200秒且RestartWutheringWaves为True即两小时重启一次
 DetectionUE4: True # 是否检测UE4崩溃窗口，推荐开启True 
 UE4_POPUP: 30 # UE4崩溃窗口检测的间隔时间，默认30秒检测一次
-ISLoadingJue: False #角副本卡加载检测开关"
-isLoading_Jue_time: 10  # 角卡加载检测时长:默认10秒，调高会影响检测效率
+ISLoadingJue: False #角副本卡加载检测开关,RestartWutheringWaves与ISLoadingJue二选一，推荐开启ISLoadingJue" 
+isLoading_Jue_time: 8  # 角卡加载检测时长:默认8秒，调高会影响检测效率
 
 # 控制台信息
 EchoDebugMode: true #声骸锁定功能DEBUG显示输出的开关
