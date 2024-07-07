@@ -6,30 +6,27 @@ from config import config
 # 读取崩溃后的的值
 
 
+
+
 def get_crashes_value():
-    if os.path.exists(config.LogFilePath):
-        with open(config.LogFilePath, "r", encoding="utf-8") as f:
-            lines = f.readlines()
+    try:
+        if os.path.exists(config.LogFilePath):
+            with open(config.LogFilePath, "r", encoding="utf-8",errors='ignore') as f:
+                lines = f.readlines()
 
-        for line in reversed(lines):
-            match = re.search(
-                r"战斗次数：(\d+) 吸收次数：(\d+)(?: 治疗次数：(\d+))?", line
-            )
+            for line in reversed(lines):
+                match = re.search(
+                    r"战斗次数：(\d+) 吸收次数：(\d+)(?: 治疗次数：(\d+))?", line
+                )
 
-            if match:
-                battle_count = int(match.group(1))
-                absorb_count = int(match.group(2))
-                heal_count = int(match.group(3)) if match.group(3) else 0
-                if battle_count >= 1 and absorb_count >= 0 and heal_count >= 0:
-                    return battle_count, absorb_count, heal_count
-                else:
-                    is_crashes_file = os.path.join(config.project_root, "isCrashes.txt")
-                    with open(is_crashes_file, "w") as f:
-                        f.write(str(False))
-                    return 0, 0, 0
-    return 0, 0, 0
-    # 如果并未使用战斗脚本但游戏发生崩溃或战斗次数统计出错，此时无返回值将导致TypeError: cannot unpack non-iterable NoneType object
-    # 故返回0,0,0并重新赋值False以重置崩溃状态(ArcS17)
+                if match:
+                    battle_count = int(match.group(1))
+                    absorb_count = int(match.group(2))
+                    heal_count = int(match.group(3)) if match.group(3) else 0
+                    if battle_count >= 1 and absorb_count >= 0 and heal_count >= 0:
+                        return battle_count, absorb_count, heal_count
+    except Exception as e:
+        return 0, 0, 0
 
 
 # battle_count, absorb_count, heal_count = getCrashesValue()
