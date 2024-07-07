@@ -325,6 +325,11 @@ def transfer() -> bool:
             # healBossName = "朔雷之鳞"  # 固定目标boss名称
             logger("开始治疗")
             time.sleep(1)
+            info.lastBossName = "治疗"
+            control.activate()
+            control.tap(win32con.VK_F2)
+            time.sleep(1)
+            transfer_to_heal()
     bossName = config.TargetBoss[info.bossIndex % len(config.TargetBoss)]
 
 
