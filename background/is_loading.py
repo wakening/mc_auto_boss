@@ -8,8 +8,7 @@ import numpy as np
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed  # 导入ThreadPoolExecutor和as_completed，用于并发执行任务
 from config import config
-from utils import *
-
+from status import info, logger
 
 def isNumber_isloading(keyword, screenshot):
     text = pytesseract.image_to_string(screenshot)
@@ -64,7 +63,7 @@ def isNumber_isloading_disPlays():
             last_number = number  # 必须做的，将ocr识别到的赋值给临时变量 last_number
         except Exception as e:
             # 出现异常，结束循环
-            # logger("卡进度检测结束，没有检测到卡进度")
+            # logger(f"卡进度检测结束，没有检测到卡进度{e}")
             return
 
 
