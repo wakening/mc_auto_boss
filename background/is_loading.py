@@ -1,3 +1,4 @@
+import gc
 import time
 import pytesseract
 import win32con
@@ -8,8 +9,7 @@ import numpy as np
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed  # 导入ThreadPoolExecutor和as_completed，用于并发执行任务
 from config import config
-from utils import *
-
+from status import info, logger
 
 def isNumber_isloading(keyword, screenshot):
     text = pytesseract.image_to_string(screenshot)
@@ -20,17 +20,21 @@ def isNumber_isloading(keyword, screenshot):
 
 
 def isNumber_isloading_disPlay(screenshot):
-    # 使用 pytesseract 识别截图中的文字
-    text = pytesseract.image_to_string(screenshot)
+    try:
+        # 使用 pytesseract 识别截图中的文字
+        text = pytesseract.image_to_string(screenshot)
 
-    # 检查识别到的文字是否包含数字
-    if any(char.isdigit() for char in text):
-        return text
-    else:
-        return None
+        # 检查识别到的文字是否包含数字
+        if any(char.isdigit() for char in text):
+            return text
+        else:
+            return None
+    finally:
+        # screenshot = None
+        gc.unfreeze()
 
-
-def isNumber_isloading_disPlays():
+# interval = 0.2  # 默认截图间隔
+def isNumber_isloading_disPlays(interval:float):
     """
     检查游戏《鸣潮》的加载进度，以确定是否卡加载进度。
 
@@ -40,15 +44,14 @@ def isNumber_isloading_disPlays():
     last_number = None  # 上一次识别到的数字
     appear_count = 0  # 连续出现的次数
     number = 0  # OCR识别的进度值
-    interval = 0.2  # OCR间隔时间
     weight = 0.8  # 权重
+  
     # timeout = 超时的时间/权重
     timeout = config.ISLoadingTimeout / weight
     while True:
         try:
-            time.sleep(interval)
             # 获取游戏窗口的加载进度文本
-            text = isNumber_isloading_disPlay(capture_window(win32gui.FindWindow(None, "鸣潮  ")))
+            text = isNumber_isloading_disPlay(capture_window(win32gui.FindWindow(None, "鸣潮  "),interval))
             # 将文本中的百分号去除，转换为整数
             number = int(text.replace('%', ''))
             if last_number is not None and number == last_number:
@@ -64,21 +67,46 @@ def isNumber_isloading_disPlays():
             last_number = number  # 必须做的，将ocr识别到的赋值给临时变量 last_number
         except Exception as e:
             # 出现异常，结束循环
-            # logger("卡进度检测结束，没有检测到卡进度")
+            # logger(f"卡进度检测结束，没有检测到卡进度{e}")
             return
 
 
-def capture_window(hwnd):
-    left, top, right, bottom = win32gui.GetWindowRect(hwnd)  # 获取窗口的位置和大小
+# def capture_window(hwnd):
+#     left, top, right, bottom = win32gui.GetWindowRect(hwnd)  # 获取窗口的位置和大小
+#     width = right - left  # 计算窗口宽度
+#     height = bottom - top  # 计算窗口高度
+#     if (width >= 1280 and height >= 720):
+#         screenshot = pyautogui.screenshot(region=(right - 250, bottom - 200, 200, 160))  # 截取窗口右下角区域
+#     elif (width >= 1920 and height >= 1080):
+#         screenshot = pyautogui.screenshot(region=(right - 250, bottom - 200, 240, 140))  # 截取窗口右下角区域
+#     screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)  # 将图片从RGB格式转换为BGR格式
+#     return screenshot
+
+# 创建一个字典来存储窗口位置和大小的缓存
+window_cache = {}
+
+def capture_window(hwnd, interval):
+    if hwnd in window_cache:
+        left, top, right, bottom = window_cache[hwnd]
+    else:
+        left, top, right, bottom = win32gui.GetWindowRect(hwnd)  # 获取窗口的位置和大小
+        window_cache[hwnd] = (left, top, right, bottom)  # 将结果存入缓存
+
     width = right - left  # 计算窗口宽度
     height = bottom - top  # 计算窗口高度
+    region = None
     if (width >= 1280 and height >= 720):
-        screenshot = pyautogui.screenshot(region=(right - 250, bottom - 200, 200, 160))  # 截取窗口右下角区域
+        region = (right - 250, bottom - 200, 200, 160)  # 截取窗口右下角区域
     elif (width >= 1920 and height >= 1080):
-        screenshot = pyautogui.screenshot(region=(right - 250, bottom - 200, 240, 140))  # 截取窗口右下角区域
-    screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)  # 将图片从RGB格式转换为BGR格式
-    return screenshot
+        region = (right - 250, bottom - 200, 240, 140)  # 截取窗口右下角区域
 
+    if region is not None:
+        time.sleep(interval)  # 增加延迟-间隔
+        screenshot = pyautogui.screenshot(region=region)  # 根据计算出的region截取图片
+        screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)  # 将图片从RGB格式转换为BGR格式
+        return screenshot
+    else:
+        return None
 
 def find_keyword_loading(keyword):
     hwnd = win32gui.FindWindow(None, "鸣潮  ")
@@ -86,7 +114,7 @@ def find_keyword_loading(keyword):
     right_amount = 0  # 正确次数
     weight = 0.8  # 权重
     for i in range(detection_count):
-        screenshot = capture_window(hwnd)  # 获取到截取的图片
+        screenshot = capture_window(hwnd, 0.2)  # 获取到截取的图片
         if isNumber_isloading(keyword, screenshot):  # 判断是否包含关键词
             right_amount += 1
         time.sleep(1)  # 每秒截图1次
