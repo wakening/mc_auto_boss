@@ -78,11 +78,12 @@ lastMsg = ""
 def logger(msg: str, level: str = "INFO", display: bool = True):
     global lastMsg
     content = (
-        f"【{level}】 "
-        f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} "
-        f"战斗次数：{info.fightCount} "
+        f"【{level}】".ljust(7,' ') +
+        f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} " +
+        f"战斗次数：{info.fightCount} " +
         f"吸收次数：{info.absorptionCount} "
     )
+    # ljust函数对齐log输出
     if config.CharacterHeal:
         content += f"治疗次数：{info.healCount} "
     content += f"{msg}"

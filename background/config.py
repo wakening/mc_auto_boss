@@ -7,6 +7,7 @@
 """
 from pydantic import BaseModel, Field
 import yaml
+import shutil
 import os
 import winreg
 from cmd_line import get_config_path
@@ -132,8 +133,19 @@ if os.path.exists(config_path):
         config = Config(**yaml.safe_load(f))
 else:
     config = Config()
-    with open(config_path, "w", encoding="utf-8") as f:
-        yaml.safe_dump(config.dict(), f)
+    # with open(config_path, "w", encoding="utf-8") as f:
+    #     yaml.safe_dump(config.dict(), f)
+    '''
+    若初始化时config文件不存在将复制example自动生成config文件
+    替代之版本yaml函数读取无注释字符串流版本的无格式config文件
+    并提醒用户配置文件
+    '''
+    config_example = os.path.join(config.project_root, 'config.example.yaml') 
+    config_auto = os.path.join(config.project_root, 'config.yaml') 
+    with open(config_example, 'rb') as source_file:
+        with open(config_auto, 'wb') as dest_file:
+            shutil.copyfileobj(source_file, dest_file)
+    print("\n未找到配置文件，已按example为模板自动生成，请进行配置")
 
 if len(config.TargetBoss) == 0:
     print("请在配置文件中填写目标BOSS全名，配置文件路径: %s" % config_path)
