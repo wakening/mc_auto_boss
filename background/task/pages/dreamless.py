@@ -146,9 +146,9 @@ def start_challenge_action(positions: dict[str, Position]) -> bool:
     """
     position = positions["开启挑战"]
     click_position(position)
-    time.sleep(0.2)
+    time.sleep(0.5)
     if config.ISLoadingJue:
-        is_loading.isNumber_isloading_disPlays()
+        is_loading.isNumber_isloading_disPlays(0.2)
     info.lastFightTime = datetime.now()
     return True
 
@@ -212,7 +212,7 @@ def confirm_leave_action(positions: dict[str, Position]) -> bool:
     click_position(positions["确认"])
     time.sleep(0.5)
     if config.ISLoadingJue:
-        is_loading.isNumber_isloading_disPlays()
+        is_loading.isNumber_isloading_disPlays(0.2)
     # # 检测到卡加载界面
     # if is_loading.check_results():
     #     # 关闭鸣潮弹窗
