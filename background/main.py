@@ -175,9 +175,9 @@ def run(task: Task, e: event):
         return
     e.set()
 
-    logger("卡加载监测启动")
-    anti_stuck_list = []
-    last_timestamp = int(time.time())
+    # logger("卡加载监测启动")
+    # anti_stuck_list = []
+    # last_timestamp = int(time.time())
 
     while e.is_set():
         img = screenshot()
@@ -185,9 +185,9 @@ def run(task: Task, e: event):
         task(img, result)
 
         # 监测游戏是否卡加载，长时间卡在加载界面就干掉游戏进程
-        check_timestamp = anti_stuck_monitor(img, anti_stuck_list, last_timestamp)
-        if check_timestamp is not None:
-            last_timestamp = check_timestamp
+        # check_timestamp = anti_stuck_monitor(img, anti_stuck_list, last_timestamp)
+        # if check_timestamp is not None:
+        #     last_timestamp = check_timestamp
     logger("进程停止运行")
 
 
