@@ -16,7 +16,6 @@ from echo import EchoModel
 
 
 class Config(BaseModel):
-
     # 脚本基础配置
     AppPath: Optional[str] = Field(None, title="游戏路径")
     ModelName: Optional[str] = Field("yolo", title="模型的名称,默认是yolo.onnx")
@@ -30,10 +29,10 @@ class Config(BaseModel):
     RestartWutheringWaves: bool = Field(False, title="定时重启游戏以避免游戏卡10%、75%等特殊进度")
     RestartWutheringWavesTime: int = Field(7200, title="游戏自动重启间隔时间")
     RebootCount: int = Field(0, title="截取窗口失败次数")
-    DetectionUE4:bool = Field(True, title="是否检测UE4崩溃")
-    ISLoadingJue :bool = Field(False, title="角副本卡加载检测开关")
-    IsLoadingJueTime:int = Field(8, title="角卡加载检测时长")
-    UE4_POPUP:int = Field(30, title="UE4崩溃弹窗检测间隔时间")
+    DetectionUE4: bool = Field(True, title="是否检测UE4崩溃")
+    ISLoadingJue: bool = Field(False, title="卡加载进度开关")
+    ISLoadingTimeout: int = Field(8, title="卡加载超时时间")
+    UE4_POPUP: int = Field(30, title="UE4崩溃弹窗检测间隔时间")
 
     # 控制台信息
     EchoDebugMode: bool = Field(True, title="声骸锁定功能DEBUG显示输出的开关")
@@ -72,7 +71,6 @@ class Config(BaseModel):
         ],
         title="大招释放成功时的技能释放顺序",
     )
-
 
     def __init__(self, **data):
         super().__init__(**data)
