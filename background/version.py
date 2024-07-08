@@ -1,6 +1,13 @@
 __version__ = "1.2.0"
-release_date = "2024-07-07"
+release_date = "2024-07-08"
 description = "更新"
+
+# ver1.2.1
+# update:2024-07-08
+# updated by wang115t
+# 1.重构代码，副本打完BOSS卡加载后，自动重启游戏的功能
+# 2.过副本支持显示进度条
+
 
 # ver1.2.0
 # update:2024-07-07
