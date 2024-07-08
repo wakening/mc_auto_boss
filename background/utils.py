@@ -259,7 +259,7 @@ def transfer_to_boss(bossName):
         logger("等待传送完成")
         # time.sleep(0.1)
         if config.ISLoadingJue:
-            is_loading.isNumber_isloading_disPlays()
+            is_loading.isNumber_isloading_disPlays(0.2)
         wait_home()  # 等待回到主界面
         logger("传送完成")
         now = datetime.now()
@@ -301,7 +301,7 @@ def transfer_to_dreamless():
         logger("等待传送完成")
         time.sleep(0.2)
         if config.ISLoadingJue:
-            is_loading.isNumber_isloading_disPlays()
+            is_loading.isNumber_isloading_disPlays(0.2)
         wait_home()  # 等待回到主界面
         logger("传送完成")
         time.sleep(2)
