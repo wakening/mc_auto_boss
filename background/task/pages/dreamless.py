@@ -210,7 +210,7 @@ def confirm_leave_action(positions: dict[str, Position]) -> bool:
     :return:
     """
     click_position(positions["确认"])
-    time.sleep(0.5)git
+    time.sleep(0.5)
     if config.ISLoadingJue:
         is_loading.isNumber_isloading_disPlays()
     # # 检测到卡加载界面
