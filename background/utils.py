@@ -13,6 +13,7 @@ import os
 import win32con
 import numpy as np
 import itertools
+import is_loading
 from PIL import Image, ImageGrab
 from ctypes import windll
 from typing import List, Tuple, Union
@@ -256,7 +257,9 @@ def transfer_to_boss(bossName):
     if transfer := wait_text("快速旅行"):
         click_position(transfer.position)
         logger("等待传送完成")
-        time.sleep(3)
+        # time.sleep(0.1)
+        if config.ISLoadingJue:
+            is_loading.isNumber_isloading_disPlays()
         wait_home()  # 等待回到主界面
         logger("传送完成")
         now = datetime.now()
@@ -296,7 +299,9 @@ def transfer_to_dreamless():
     if transfer := wait_text("快速旅行"):
         click_position(transfer.position)
         logger("等待传送完成")
-        time.sleep(3)
+        time.sleep(0.2)
+        if config.ISLoadingJue:
+            is_loading.isNumber_isloading_disPlays()
         wait_home()  # 等待回到主界面
         logger("传送完成")
         time.sleep(2)
