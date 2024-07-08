@@ -175,9 +175,9 @@ def run(task: Task, e: event):
         return
     e.set()
 
-    # logger("卡加载监测启动")
-    # anti_stuck_list = []
-    # last_timestamp = int(time.time())
+    logger("卡加载监测启动")
+    anti_stuck_list = []
+    last_timestamp = int(time.time())
 
     while e.is_set():
         img = screenshot()
@@ -185,9 +185,9 @@ def run(task: Task, e: event):
         task(img, result)
 
         # 监测游戏是否卡加载，长时间卡在加载界面就干掉游戏进程
-        # check_timestamp = anti_stuck_monitor(img, anti_stuck_list, last_timestamp)
-        # if check_timestamp is not None:
-        #     last_timestamp = check_timestamp
+        check_timestamp = anti_stuck_monitor(img, anti_stuck_list, last_timestamp)
+        if check_timestamp is not None:
+            last_timestamp = check_timestamp
     logger("进程停止运行")
 
 
@@ -235,8 +235,9 @@ def on_press(key):
         logger("请等待程序退出后再关闭窗口...")
         taskEvent.clear()
         mouseResetEvent.set()
-        restart_thread.terminate()
-        find_crash_popup_thread.terminate()
+        restart_thread.terminate() # 杀死默认开启状态的检测窗口的线程
+        if config.DetectionUE4:  # 检测UE4窗口崩溃时开启状态的时候，才杀死该线程  
+            find_crash_popup_thread.terminate()
         return False
     return None
 
@@ -284,12 +285,12 @@ if __name__ == "__main__":
         target=restart_app, args=(taskEvent,), name="restart_event"
     )
     restart_thread.start()
+   
     if config.DetectionUE4:
-        # 创建并启动线程-检查UE4崩溃弹窗
-        find_crash_popup_thread = Process(
-        target=find_and_press_enter
-    )
-        find_crash_popup_thread.start()
+            # 创建并启动线程-检查UE4崩溃弹窗
+            find_crash_popup_thread = Process(
+            target=find_and_press_enter)
+            find_crash_popup_thread.start()
     if app_path:
         logger(f"游戏路径：{config.AppPath}")
     else:
