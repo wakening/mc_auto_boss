@@ -95,7 +95,7 @@ tips_page = Page(
         ),
         TextMatch(
             name="确认",
-            text="确认",
+            text=template("^确认$"),
         ),
         TextMatch(
             name="登录",
