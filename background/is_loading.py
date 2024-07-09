@@ -58,7 +58,7 @@ def isNumber_isloading_disPlays(interval:float):
                 appear_count += 1
             else:
                 appear_count = 0  # 出现的数字和上一次不一样，置0
-                logger("地图加载进度：" + text)  # 出现的数字和上一次不一样, 打印日志
+                logger("地图加载进度：" + text,"DEBUG")  # 出现的数字和上一次不一样, 打印日志
             if appear_count >= (round(timeout / interval * weight)):  # 加载进度超时，则认为游戏卡加载进度，关闭加载窗口，结束检查
                 logger(f"监测到游戏在{config.ISLoadingTimeout}s内连续卡在进度{text}, 关闭游戏",
                        "WARN")
