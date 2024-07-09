@@ -1,6 +1,15 @@
-__version__ = "1.2.0"
+__version__ = "1.2.2"
 release_date = "2024-07-08"
 description = "更新"
+
+# ver1.2.2
+# update:2024-07-08
+# updated by ArcS17
+# 1.新增初始化时config文件不存在以example为模板自动生成完整格式及风格的config文件
+# 2.absorption_action完成后统计一次吸收率
+# 3.config.example.TargetBoss示例增加角
+# 4.对齐日志各Level输出
+
 
 # ver1.2.1
 # update:2024-07-08

@@ -407,7 +407,7 @@ def screenshot() -> np.ndarray | None:
     result = windll.user32.PrintWindow(hwnd, saveDC.GetSafeHdc(), 3)
     if result != 1:
         config.RebootCount += 1
-        logger("截取游戏窗口失败，请勿最小化窗口，重试次数：" + str(config.RebootCount), "ERROR")
+        logger("截取游戏窗口失败，请勿最小化窗口，已重试：" + str(config.RebootCount) + "次", "ERROR")
         # 释放所有资源
         try:
             win32gui.DeleteObject(saveBitMap.GetHandle())
@@ -417,9 +417,10 @@ def screenshot() -> np.ndarray | None:
             del hwndDC, mfcDC, saveDC, saveBitMap
         except Exception as e:
             logger(f"清理截图资源失败: {e}", "ERROR")
-        #重试，若失败多次重新启动游戏以唤醒至前台(ArcS17)
-        if config.RebootCount < 10:
-            return screenshot()  # 如果截取失败，则重试十次
+        #重试，若失败多次重新启动游戏以唤醒至前台
+        if config.RebootCount < 5:
+            time.sleep(1)
+            return screenshot()  # 截取失败，重试
         else:
             config.RebootCount = 0
             logger("正在重新启动游戏及脚本...", "INFO")
@@ -613,6 +614,7 @@ def absorption_and_receive_rewards(positions: dict[str, Position]) -> bool:
         return False
     logger("吸收声骸")
     info.absorptionCount += 1
+    logger(f"目前声骸吸收率为：" + str(format(info.absorptionCount/info.fightCount*100, '.2f')) + "%", "DEBUG")
     return True
 
 
