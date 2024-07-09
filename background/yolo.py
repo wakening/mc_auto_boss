@@ -11,18 +11,21 @@ import os
 import numpy as np
 import cv2
 from config import config
+from multiprocessing import current_process
 
 
-model_path = os.path.join(root_path, "models/"+config.ModelName+".onnx")
+model_path = os.path.join(root_path, "models/" + config.ModelName + ".onnx")
 # 判断能否使用GPU
 if "CUDAExecutionProvider" in rt.get_available_providers():
     provider = ["CUDAExecutionProvider"]
 else:
     provider = ["CPUExecutionProvider"]
 
-model = rt.InferenceSession(model_path, providers=provider)
-input_name = model.get_inputs()[0].name
-label_name = model.get_outputs()[0].name
+model = None
+if current_process().name == "task":
+    model = rt.InferenceSession(model_path, providers=provider)
+    input_name = model.get_inputs()[0].name
+    label_name = model.get_outputs()[0].name
 
 
 class LetterBox:
@@ -31,13 +34,13 @@ class LetterBox:
     """
 
     def __init__(
-            self,
-            new_shape=(640, 640),
-            auto=False,
-            scaleFill=False,
-            scaleup=True,
-            center=True,
-            stride=32,
+        self,
+        new_shape=(640, 640),
+        auto=False,
+        scaleFill=False,
+        scaleup=True,
+        center=True,
+        stride=32,
     ):
         """初始化LetterBox对象，指定特定参数。
 

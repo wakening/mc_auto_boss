@@ -13,25 +13,31 @@ import numpy as np
 from schema import OcrResult, Position
 from config import config
 import logging
+from status import logger
 
 
 ocrIns: PaddleOCR = None
 
-if paddle.is_compiled_with_cuda() and paddle.get_device().startswith('gpu'):  # 判断是否调用GPU
+if paddle.is_compiled_with_cuda() and paddle.get_device().startswith(
+    "gpu"
+):  # 判断是否调用GPU
     use_gpu = True
 else:
     use_gpu = False
 
 if current_process().name == "task":
+    logger("OCR初始化中...")
     logging.disable(logging.WARNING)  # 关闭WARNING日志的打印
-    ocrIns = PaddleOCR(use_angle_cls=False, use_gpu=use_gpu, lang="ch",show_log=False)
+    ocrIns = PaddleOCR(use_angle_cls=False, use_gpu=use_gpu, lang="ch", show_log=False)
 
 last_time = time.time()
 
 
 def ocr(img: np.ndarray) -> list[OcrResult]:
     global last_time
-    if config.OcrInterval > 0 and time.time() - last_time < config.OcrInterval:  # 限制OCR调用频率
+    if (
+        config.OcrInterval > 0 and time.time() - last_time < config.OcrInterval
+    ):  # 限制OCR调用频率
         if wait_time := config.OcrInterval - (time.time() - last_time) > 0:
             time.sleep(wait_time)
     last_time = time.time()
