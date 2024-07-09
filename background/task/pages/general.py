@@ -5,6 +5,7 @@
 @time: 2024/6/5 上午9:34
 @author SuperLazyDog
 """
+import hwnd_util
 from . import *
 
 pages = []
@@ -362,3 +363,119 @@ login_page = Page(
 )
 # 将login_page对象添加到pages列表中
 pages.append(login_page)
+
+
+def confirm_page_action(positions: dict[str, Position]) -> bool:
+    """
+    更新完成，请重新启动游戏。
+    :param positions: 位置信息
+    :return:
+    """
+    position = positions["确认"]
+    click_position(position)
+    time.sleep(2)
+    return True
+
+
+disconnected_page = Page(
+    name="连接已断开",
+    targetTexts=[
+        TextMatch(
+            name="连接已断开",
+            text="连接已断开",
+        ),
+        TextMatch(
+            name="登录超时，请重新尝试。",
+            text="登录超时",
+        ),
+        TextMatch(
+            name="确认",
+            text=template("^确认$"),
+        ),
+    ],
+    action=confirm_page_action,
+)
+pages.append(disconnected_page)
+
+
+network_timeout_page = Page(
+    name="系统提示",
+    targetTexts=[
+        TextMatch(
+            name="系统提示",
+            text="系统提示",
+        ),
+        TextMatch(
+            name="网络请求超时，无法连接服务器，请稍后再尝试。",
+            text="网络请求超时",
+        ),
+        TextMatch(
+            name="确认",
+            text=template("^确认$"),
+        ),
+    ],
+    action=confirm_page_action,
+)
+pages.append(network_timeout_page)
+
+
+def account_login_action(positions: dict[str, Position]) -> bool:
+    def click_login_page(ck_login_hwnd):
+        try:
+            ocr_text_result = find_text_in_login_hwnd("^登录$", ck_login_hwnd)
+            if ocr_text_result is None:
+                return False
+            # 文本相对于登录框的位置
+            # logger(f"position: {ocr_text_result.position}")
+            click_position_in_login_hwnd(ocr_text_result.position, specified_hwnd=ck_login_hwnd)
+        except Exception as e:
+            pass
+        time.sleep(3)
+        return True
+
+    # 手机号登录窗口特殊，是遮盖在游戏上方的另一个窗口句柄，费老半天才搞明白 by wakening
+    # 调用游戏窗口截图会截取到登录窗口下层的游戏窗口，点击也是点不到上层
+    # 先试官服
+    login_hwnd_list = hwnd_util.get_login_hwnd_official()
+    if login_hwnd_list is not None and len(login_hwnd_list) > 0:
+        for login_hwnd in login_hwnd_list:
+            if click_login_page(login_hwnd):
+                logger("官服点击登录")
+                return True
+
+    # 再试b服
+    login_hwnd = hwnd_util.get_login_hwnd_bilibili()
+    if click_login_page(login_hwnd):
+        logger("b服点击登录")
+        return True
+
+    # logger("未找到登录页面")
+    time.sleep(5)
+    return False
+
+
+# 游戏掉线等原因出现的登录窗口，覆盖在游戏窗口之上，
+# 点击登录后才会出现点击连接，以此区分
+account_login_page = Page(
+    name="账户登录",
+    targetTexts=[
+        TextMatch(
+            name="退出",
+            text="退出",
+        ),
+        TextMatch(
+            name="登入",
+            text="登入",
+        ),
+
+    ],
+    excludeTexts=[
+        TextMatch(
+            name="点击连接",
+            text="点击连接",
+        ),
+    ],
+    action=account_login_action,
+)
+pages.append(account_login_page)
+
