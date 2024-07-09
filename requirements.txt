@@ -12,4 +12,3 @@ paddleocr
 colorama
 requests
 pyautogui
-pytesseract

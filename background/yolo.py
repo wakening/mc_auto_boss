@@ -28,6 +28,15 @@ if current_process().name == "task":
     label_name = model.get_outputs()[0].name
 
 
+def _update_labels(labels, ratio, padw, padh):
+    """Update labels."""
+    labels["instances"].convert_bbox(format="xyxy")
+    labels["instances"].denormalize(*labels["img"].shape[:2][::-1])
+    labels["instances"].scale(*ratio)
+    labels["instances"].add_padding(padw, padh)
+    return labels
+
+
 class LetterBox:
     """
     Resize image and padding for detection, instance segmentation, pose.
@@ -115,20 +124,12 @@ class LetterBox:
             labels["ratio_pad"] = (labels["ratio_pad"], (left, top))  # 用于评估
 
         if len(labels):
-            labels = self._update_labels(labels, ratio, dw, dh)
+            labels = _update_labels(labels, ratio, dw, dh)
             labels["img"] = img
             labels["resized_shape"] = new_shape
             return labels
         else:
             return img
-
-    def _update_labels(self, labels, ratio, padw, padh):
-        """Update labels."""
-        labels["instances"].convert_bbox(format="xyxy")
-        labels["instances"].denormalize(*labels["img"].shape[:2][::-1])
-        labels["instances"].scale(*ratio)
-        labels["instances"].add_padding(padw, padh)
-        return labels
 
 
 def getInter(box1, box2):

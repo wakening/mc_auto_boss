@@ -13,11 +13,10 @@ import os
 import win32con
 import numpy as np
 import itertools
-import is_loading
 from PIL import Image, ImageGrab
 from ctypes import windll
 from typing import List, Tuple, Union
-from constant import root_path, hwnd, real_w, real_h, width_ratio, height_ratio, scale_factor
+from constant import root_path, hwnd, real_w, real_h, width_ratio, height_ratio
 from ocr import ocr
 from schema import match_template, OcrResult
 from control import control
@@ -27,7 +26,7 @@ from schema import Position
 from datetime import datetime
 from yolo import search_echoes
 from echo import echo
-from auto_yolo_switch import model_boss_yolo
+
 
 def interactive():
     control.tap("f")
@@ -47,11 +46,11 @@ def click_position(position: Position):
 
 # 账户登录窗口专用点击方法 by wakening
 def click_position_in_login_hwnd(
-        position: Position,
-        specified_hwnd,
-        range_x: int = 3,
-        range_y: int = 3,
-        need_print: bool = False
+    position: Position,
+    specified_hwnd,
+    range_x: int = 3,
+    range_y: int = 3,
+    need_print: bool = False,
 ):
     """
     点击位置
@@ -127,8 +126,18 @@ def release_skills():
                 elif tactic == "r":  # 大招时判断是否释放
                     control.fight_tap(tactic)
                     time.sleep(0.2)
-                    if config.WaitUltAnimation:  # 等待大招时间，目前4k屏，175%缩放，游戏分辨率1920*1080,测试有效，可能需要做适配
-                        ult_animation_not_use = find_pic(1750, 915, 1860, 1035,f"R按键{info.adaptsResolution}.png", 0.6, need_resize=False)
+                    if (
+                        config.WaitUltAnimation
+                    ):  # 等待大招时间，目前4k屏，175%缩放，游戏分辨率1920*1080,测试有效，可能需要做适配
+                        ult_animation_not_use = find_pic(
+                            1750,
+                            915,
+                            1860,
+                            1035,
+                            f"R按键{info.adaptsResolution}.png",
+                            0.6,
+                            need_resize=False,
+                        )
                         if ult_animation_not_use is None:
                             logger("检测到大招释放，等待大招动画")
                             time.sleep(1.6)
@@ -136,7 +145,7 @@ def release_skills():
                             break
                 else:
                     control.fight_tap(tactic)
-            elif len(tactic) >= 2 and tactic[1] == "~": # 如果没有指定时间，默认0.5秒
+            elif len(tactic) >= 2 and tactic[1] == "~":  # 如果没有指定时间，默认0.5秒
                 click_time = 0.5 if len(tactic) == 2 else float(tactic.split("~")[1])
                 if tactic[0] == "a":
                     control.mouse_press()
@@ -146,8 +155,12 @@ def release_skills():
                     control.key_press(tactic[0])
                     time.sleep(click_time)
                     control.key_release(tactic[0])
-            elif '(' in tactic and ')' in tactic:  # 以设置的连续按键时间进行连续按键，识别格式：key(float)
-                continuous_tap_time = float(tactic[tactic.find('(') + 1:tactic.find(')')])
+            elif (
+                "(" in tactic and ")" in tactic
+            ):  # 以设置的连续按键时间进行连续按键，识别格式：key(float)
+                continuous_tap_time = float(
+                    tactic[tactic.find("(") + 1 : tactic.find(")")]
+                )
                 try:
                     continuous_tap_time = float(continuous_tap_time)
                 except ValueError:
@@ -179,7 +192,9 @@ def release_skills_after_ult():
             except:
                 pass
             time.sleep(np.random.uniform(0, 0.02))  # 随机等待
-            if len(tacticUlt) == 1:  # 如果只有一个字符，且为普通攻击，进行连续0.3s的点击
+            if (
+                len(tacticUlt) == 1
+            ):  # 如果只有一个字符，且为普通攻击，进行连续0.3s的点击
                 if tacticUlt == "a":
                     continuous_tap_time = 0.3
                     tap_start_time = time.time()
@@ -192,16 +207,29 @@ def release_skills_after_ult():
                 elif tacticUlt == "r":  # 大招时判断是否释放
                     control.fight_tap(tacticUlt)
                     time.sleep(0.2)
-                    if config.WaitUltAnimation:  # 等待大招时间，目前4k屏，175%缩放，游戏分辨率1920*1080,测试有效，可能需要做适配
-                        ult_animation_not_use = find_pic(1750, 915, 1860, 1035,f"R按键{info.adaptsResolution}.png", 0.6)
+                    if (
+                        config.WaitUltAnimation
+                    ):  # 等待大招时间，目前4k屏，175%缩放，游戏分辨率1920*1080,测试有效，可能需要做适配
+                        ult_animation_not_use = find_pic(
+                            1750,
+                            915,
+                            1860,
+                            1035,
+                            f"R按键{info.adaptsResolution}.png",
+                            0.6,
+                        )
                         if ult_animation_not_use is None:
                             logger("检测到大招释放，等待大招动画")
                             time.sleep(0.5)
                             release_skills_after_ult()  # 此处或许不需要太长的等待时间，因为此处应该是二段大招(如果未来有)。
                 else:
                     control.fight_tap(tacticUlt)
-            elif len(tacticUlt) >= 2 and tacticUlt[1] == "~":  # 如果没有指定时间，默认0.5秒
-                click_time = 0.5 if len(tacticUlt) == 2 else float(tacticUlt.split("~")[1])
+            elif (
+                len(tacticUlt) >= 2 and tacticUlt[1] == "~"
+            ):  # 如果没有指定时间，默认0.5秒
+                click_time = (
+                    0.5 if len(tacticUlt) == 2 else float(tacticUlt.split("~")[1])
+                )
                 if tacticUlt[0] == "a":
                     control.mouse_press()
                     time.sleep(click_time)
@@ -210,8 +238,12 @@ def release_skills_after_ult():
                     control.key_press(tacticUlt[0])
                     time.sleep(click_time)
                     control.key_release(tacticUlt[0])
-            elif '(' in tacticUlt and ')' in tacticUlt:  # 以设置的连续按键时间进行连续按键，识别格式：key(float)
-                continuous_tap_time = float(tacticUlt[tacticUlt.find('(') + 1:tacticUlt.find(')')])
+            elif (
+                "(" in tacticUlt and ")" in tacticUlt
+            ):  # 以设置的连续按键时间进行连续按键，识别格式：key(float)
+                continuous_tap_time = float(
+                    tacticUlt[tacticUlt.find("(") + 1 : tacticUlt.find(")")]
+                )
                 try:
                     continuous_tap_time = float(continuous_tap_time)
                 except ValueError:
@@ -255,7 +287,6 @@ def transfer_to_boss(bossName):
         control.esc()
         return False
     logger(f"当前目标boss：{bossName}")
-    model_boss_yolo(bossName)
     findBoss = None
     y = 133
     while y < 907:
@@ -293,8 +324,6 @@ def transfer_to_boss(bossName):
         click_position(transfer.position)
         logger("等待传送完成")
         # time.sleep(0.1)
-        if config.ISLoadingJue:
-            is_loading.isNumber_isloading_disPlays(0.2)
         wait_home()  # 等待回到主界面
         logger("传送完成")
         now = datetime.now()
@@ -335,8 +364,6 @@ def transfer_to_dreamless():
         click_position(transfer.position)
         logger("等待传送完成")
         time.sleep(0.2)
-        if config.ISLoadingJue:
-            is_loading.isNumber_isloading_disPlays(0.2)
         wait_home()  # 等待回到主界面
         logger("传送完成")
         time.sleep(2)
@@ -353,9 +380,6 @@ def transfer_to_dreamless():
     return False
 
 
-
-
-    
 def transfer() -> bool:
     if config.CharacterHeal:
         check_heal()
@@ -371,7 +395,6 @@ def transfer() -> bool:
             time.sleep(1)
             transfer_to_heal()
     bossName = config.TargetBoss[info.bossIndex % len(config.TargetBoss)]
-
 
     if info.lastBossName == "无妄者" and bossName == "无妄者":
         logger("前往无妄者 且 刚才已经前往过")
@@ -403,7 +426,7 @@ def transfer() -> bool:
     control.tap(win32con.VK_F2)
     time.sleep(1)
     if not wait_text(
-            ["日志", "活跃", "挑战", "强者", "残象", "周期", "探寻", "漂泊"], timeout=5
+        ["日志", "活跃", "挑战", "强者", "残象", "周期", "探寻", "漂泊"], timeout=5
     ):
         logger("未进入索拉指南", "WARN")
         control.esc()
@@ -442,7 +465,12 @@ def screenshot() -> np.ndarray | None:
     result = windll.user32.PrintWindow(hwnd, saveDC.GetSafeHdc(), 3)
     if result != 1:
         config.RebootCount += 1
-        logger("截取游戏窗口失败，请勿最小化窗口，已重试：" + str(config.RebootCount) + "次", "ERROR")
+        logger(
+            "截取游戏窗口失败，请勿最小化窗口，已重试："
+            + str(config.RebootCount)
+            + "次",
+            "ERROR",
+        )
         # 释放所有资源
         try:
             win32gui.DeleteObject(saveBitMap.GetHandle())
@@ -452,7 +480,7 @@ def screenshot() -> np.ndarray | None:
             del hwndDC, mfcDC, saveDC, saveBitMap
         except Exception as e:
             logger(f"清理截图资源失败: {e}", "ERROR")
-        #重试，若失败多次重新启动游戏以唤醒至前台
+        # 重试，若失败多次重新启动游戏以唤醒至前台
         if config.RebootCount < 5:
             time.sleep(1)
             return screenshot()  # 截取失败，重试
@@ -460,9 +488,10 @@ def screenshot() -> np.ndarray | None:
             config.RebootCount = 0
             logger("正在重新启动游戏及脚本...", "INFO")
             from main import close_window
+
             close_window("UnrealWindow", "鸣潮  ")
-            raise Exception('截取游戏窗口失败且重试次数超过上限，正在重启游戏')
-        
+            raise Exception("截取游戏窗口失败且重试次数超过上限，正在重启游戏")
+
     # 从位图中获取图像数据
     bmp_info = saveBitMap.GetInfo()  # 获取位图信息
     bmp_str = saveBitMap.GetBitmapBits(True)  # 获取位图数据
@@ -478,7 +507,7 @@ def screenshot() -> np.ndarray | None:
         mfcDC.DeleteDC()
         win32gui.ReleaseDC(hwnd, hwndDC)
     except Exception as e:
-        logger(f"清理截图资源失败: {e}","ERROR")
+        logger(f"清理截图资源失败: {e}", "ERROR")
     return im  # 返回截取到的图像
 
 
@@ -501,7 +530,9 @@ def screenshot_in_specified_hwnd(specified_hwnd) -> np.ndarray | None:
     saveDC = mfcDC.CreateCompatibleDC()  # 创建与mfcDC兼容的DC
     saveBitMap = win32ui.CreateBitmap()  # 创建一个位图对象
     # logger(f"int(real_sp_w), int(real_sp_h): {int(real_sp_w)}, {int(real_sp_h)}")
-    saveBitMap.CreateCompatibleBitmap(mfcDC, int(real_sp_w), int(real_sp_h))  # 创建与mfcDC兼容的位图
+    saveBitMap.CreateCompatibleBitmap(
+        mfcDC, int(real_sp_w), int(real_sp_h)
+    )  # 创建与mfcDC兼容的位图
     saveDC.SelectObject(saveBitMap)  # 选择saveDC的位图对象，准备绘图
     # 尝试使用PrintWindow函数截取窗口图像
     result = windll.user32.PrintWindow(specified_hwnd, saveDC.GetSafeHdc(), 3)
@@ -533,7 +564,7 @@ def search_text(results: List[OcrResult], target: str) -> OcrResult | None:
     target = re.sub(
         rf"[{rare_chars}]", ".", target
     )  # 判断 target 是否包含生僻字，如果包含则使用正则将生僻字替换为任意字符
-    #print("\n search的target为(-2)" + str(target)) # 主词条识别失败Debug使用
+    # print("\n search的target为(-2)" + str(target)) # 主词条识别失败Debug使用
     for result in results:
         if re.search(target, result.text):  # 使用正则匹配
             return result
@@ -592,7 +623,7 @@ def wait_text(targets: str | list[str], timeout: int = 3) -> OcrResult | None:
     return None
 
 
-def wait_home(timeout=120):
+def wait_home(timeout=120) -> bool:
     """
     等待回到主界面
     :param timeout:  超时时间
@@ -602,28 +633,31 @@ def wait_home(timeout=120):
     while True:
         # 修复部分情况下导致无法退出该循环的问题。
         if (datetime.now() - start).seconds > timeout:
-            return None
+            close_window()
+            raise Exception("等待回到主界面超时")
         img = screenshot()
         if img is None:
             continue
         results = ocr(img)
-        if text_info := search_text(results, "特征码"):  # 特征码
-            return text_info
+        if search_text(results, "特征码"):  # 特征码
+            return True
         template = Image.open(os.path.join(root_path, r"template/背包.png"))  # 背包
         template = np.array(template)
         if match_template(img, template, threshold=0.9):
-            return
+            return True
         template = Image.open(
             os.path.join(root_path, r"template/终端按钮.png")
         )  # 终端按钮
         template = np.array(template)
         if match_template(img, template, threshold=0.9):
-            return
+            return True
 
 
 def turn_to_search() -> int | None:
     x = None
-    time.sleep(3) # 增加延时以及搜索次数以避免boss死亡连招未结束导致前几轮次搜索不生效(ArcS17)
+    time.sleep(
+        3
+    )  # 增加延时以及搜索次数以避免boss死亡连招未结束导致前几轮次搜索不生效(ArcS17)
     for i in range(5):
         if i == 0:
             control.activate()
@@ -652,13 +686,15 @@ def absorption_action():
         return
     start_time = datetime.now()  # 开始时间
     absorption_max_time = (
-        config.MaxIdleTime / 2 if config.MaxIdleTime / 2 > config.MaxSearchEchoesTime else config.MaxSearchEchoesTime
+        config.MaxIdleTime / 2
+        if config.MaxIdleTime / 2 > config.MaxSearchEchoesTime
+        else config.MaxSearchEchoesTime
     )  # 最大吸收时间为最大空闲时间的一半与设定MaxSearchEchoesTime取较大值
     if absorption_max_time <= 10 and (info.inJue or info.inDreamless):
         absorption_max_time = 20
     last_x = None
     while (
-            datetime.now() - start_time
+        datetime.now() - start_time
     ).seconds < absorption_max_time:  # 未超过最大吸收时间
         img = screenshot()
         x = search_echoes(img)
@@ -709,7 +745,12 @@ def absorption_and_receive_rewards(positions: dict[str, Position]) -> bool:
         return False
     logger("吸收声骸")
     info.absorptionCount += 1
-    logger(f"目前声骸吸收率为：" + str(format(info.absorptionCount/info.fightCount*100, '.2f')) + "%", "DEBUG")
+    logger(
+        f"目前声骸吸收率为："
+        + str(format(info.absorptionCount / info.fightCount * 100, ".2f"))
+        + "%",
+        "DEBUG",
+    )
     return True
 
 
@@ -795,7 +836,12 @@ def check_heal():
         info.checkHeal = False
 
 
-def wait_text_designated_area(targets: str | list[str], timeout: int = 1, region: tuple = None, max_attempts: int = 3):
+def wait_text_designated_area(
+    targets: str | list[str],
+    timeout: int = 1,
+    region: tuple = None,
+    max_attempts: int = 3,
+):
     start = datetime.now()
     if isinstance(targets, str):
         targets = [targets]
@@ -829,7 +875,7 @@ def wait_text_designated_area(targets: str | list[str], timeout: int = 1, region
         img_cropped = np.array(img_pil)
 
         result = ocr(img_cropped)
-        #print("\n ocr(img_cropped)(-1)" + str(result)) # 主词条识别失败Debug使用(-1)
+        # print("\n ocr(img_cropped)(-1)" + str(result)) # 主词条识别失败Debug使用(-1)
         for target in targets:
             if text_info := search_text(result, target):
                 return text_info
@@ -850,7 +896,8 @@ def contrast_colors(
     coordinates: Union[Tuple[int, int], List[Tuple[int, int]]],
     target_colors: Union[Tuple[int, int, int], List[Tuple[int, int, int]]],
     threshold: float = 0.95,
-    return_all: bool = False, img: np.ndarray = None
+    return_all: bool = False,
+    img: np.ndarray = None,
 ) -> Union[bool, List[bool]]:
     """
     在 (x, y) 提取颜色，并与传入颜色元组进行欧氏距离对比获取相似度，并判断 。
@@ -904,12 +951,12 @@ def contrast_colors(
 
 
 def random_click(
-        x: int = None,
-        y: int = None,
-        range_x: int = 3,
-        range_y: int = 3,
-        ratio: bool = True,
-        need_print: bool = False
+    x: int = None,
+    y: int = None,
+    range_x: int = 3,
+    range_y: int = 3,
+    ratio: bool = True,
+    need_print: bool = False,
 ):
     """
     在以 (x, y) 为中心的区域内随机选择一个点并模拟点击。
@@ -960,12 +1007,15 @@ def boss_wait(bossName):
     keywords_dreamless = ["无", "妄", "者"]
     keywords_jue = ["角"]
 
-    def contains_any_combinations(name, keywords, min_chars):  # 为了防止BOSS名重复，添加了最小匹配关键字数
+    def contains_any_combinations(
+        name, keywords, min_chars
+    ):  # 为了防止BOSS名重复，添加了最小匹配关键字数
         for r in range(min_chars, len(keywords) + 1):
             for comb in itertools.combinations(keywords, r):
                 if all(word in name for word in comb):
                     return True
         return False
+
     if contains_any_combinations(bossName, keywords_turtle, min_chars=2):
         logger("龟龟需要等待16秒开始战斗！", "DEBUG")
         time.sleep(16)
@@ -984,8 +1034,12 @@ def boss_wait(bossName):
     info.waitBoss = False
 
 
-def set_region(x_upper_left: int = None, y_upper_left: int = None, x_lower_right: int = None,
-               y_lower_right: int = None):
+def set_region(
+    x_upper_left: int = None,
+    y_upper_left: int = None,
+    x_lower_right: int = None,
+    y_lower_right: int = None,
+):
     """
     设置区域的坐标并将其缩放到特定比例。
 
@@ -1007,14 +1061,14 @@ def set_region(x_upper_left: int = None, y_upper_left: int = None, x_lower_right
         x_upper_left * width_ratio,
         y_upper_left * height_ratio,
         x_lower_right * width_ratio,
-        y_lower_right * height_ratio
+        y_lower_right * height_ratio,
     )
     region = tuple(map(int, region))
     return region
 
 
 def echo_bag_lock():
-    is_echo_ebug = False # Debug打印开关
+    is_echo_ebug = False  # Debug打印开关
     adapts()
     """
     声骸锁定
@@ -1031,24 +1085,41 @@ def echo_bag_lock():
         this_echo_col = 6
         this_echo_row -= 1
     if info.echoNumber == 1:
-        logger("检测到声骸背包画面，3秒后将开始执行锁定程序，过程中请不要将鼠标移到游戏内。", "DEBUG")
-        logger("tips:此功能需要关闭声骸详细描述(即在角色声骸装备处显示详情，在背包内显示简介)", "WARN")
-        logger("步骤:点击键盘【C键】打开共鸣者，点击声骸，点击任意声骸，点击右上角简述将开关拨向左边", "WARN")
-        logger("请使用已适配分辨率：\n  1920*1080分辨率1.0缩放\n  1600*900分辨率1.0缩放\n  1368*768分辨率1.0缩放\n  1280*720分辨率1.5缩放\n  1280*720分辨率1.0缩放", "WARN")
+        logger(
+            "检测到声骸背包画面，3秒后将开始执行锁定程序，过程中请不要将鼠标移到游戏内。",
+            "DEBUG",
+        )
+        logger(
+            "tips:此功能需要关闭声骸详细描述(即在角色声骸装备处显示详情，在背包内显示简介)",
+            "WARN",
+        )
+        logger(
+            "步骤:点击键盘【C键】打开共鸣者，点击声骸，点击任意声骸，点击右上角简述将开关拨向左边",
+            "WARN",
+        )
+        logger(
+            "请使用已适配分辨率：\n  1920*1080分辨率1.0缩放\n  1600*900分辨率1.0缩放\n  1368*768分辨率1.0缩放\n  1280*720分辨率1.5缩放\n  1280*720分辨率1.0缩放",
+            "WARN",
+        )
         time.sleep(3)
         # 切换到时间顺序(倒序)
         logger("切换为时间倒序")
-        random_click(400, 990) # 调整点击位置以适配窗口模式下的1920*1080分辨率(ArcS17)
+        random_click(400, 990)  # 调整点击位置以适配窗口模式下的1920*1080分辨率(ArcS17)
         time.sleep(1)
         random_click(400, 860)
         time.sleep(0.5)
         random_click(718, 23)
         time.sleep(0.5)
     if config.EchoDebugMode:
-        logger(f"当前为第{this_echo_row}排，第{this_echo_col}个声骸 (总第{info.echoNumber}个)", "DEBUG")
+        logger(
+            f"当前为第{this_echo_row}排，第{this_echo_col}个声骸 (总第{info.echoNumber}个)",
+            "DEBUG",
+        )
     echo_start_position = [285, 205]  # 第一个声骸的坐标
     echo_spacing = [165, 205]  # 两个声骸间的间距
-    this_echo_x_position = (this_echo_col - 1) * echo_spacing[0] + echo_start_position[0]  # 当前需要判断的声骸x坐标
+    this_echo_x_position = (this_echo_col - 1) * echo_spacing[0] + echo_start_position[
+        0
+    ]  # 当前需要判断的声骸x坐标
     random_click(this_echo_x_position, echo_start_position[1])  # 选择当前声骸
     time.sleep(0.3)
 
@@ -1061,7 +1132,9 @@ def echo_bag_lock():
         return True
     # 判断当前声骸是否未锁定
     img = screenshot()
-    coordinate_unlock = find_pic(1700, 270, 1850, 395, f"声骸未锁定{info.adaptsResolution}.png", 0.98, img, False)
+    coordinate_unlock = find_pic(
+        1700, 270, 1850, 395, f"声骸未锁定{info.adaptsResolution}.png", 0.98, img, False
+    )
     # 先检测未锁定，再检测锁定，更快
     if coordinate_unlock:
         this_echo_lock = False
@@ -1069,13 +1142,20 @@ def echo_bag_lock():
         if config.EchoDebugMode:
             logger("当前声骸未锁定", "DEBUG")
     # 是否为锁定
-    elif find_pic(1700, 270, 1850, 395, f"声骸锁定{info.adaptsResolution}.png", 0.98, img, False):
+    elif find_pic(
+        1700, 270, 1850, 395, f"声骸锁定{info.adaptsResolution}.png", 0.98, img, False
+    ):
         info.echoIsLockQuantity += 1
         if config.EchoDebugMode:
             logger("当前声骸已锁定", "DEBUG")
         if info.echoIsLockQuantity > config.EchoMaxContinuousLockQuantity:
-            logger(f"连续检出已锁定声骸{info.echoIsLockQuantity}个，超出设定值，结束", "DEBUG")
-            logger(f"本次总共检查{info.echoNumber}个声骸，有{info.inSpecEchoQuantity}符合条件并锁定！！")
+            logger(
+                f"连续检出已锁定声骸{info.echoIsLockQuantity}个，超出设定值，结束",
+                "DEBUG",
+            )
+            logger(
+                f"本次总共检查{info.echoNumber}个声骸，有{info.inSpecEchoQuantity}符合条件并锁定！！"
+            )
             return False
         echo_next_row(info.echoNumber)
         return True
@@ -1086,11 +1166,17 @@ def echo_bag_lock():
     # 识别声骸Cost
     this_echo_cost = None
     # 先检测cost 4
-    if find_pic(1690, 200, 1830, 240, f"COST4{info.adaptsResolution}.png", 0.98, img, False):
+    if find_pic(
+        1690, 200, 1830, 240, f"COST4{info.adaptsResolution}.png", 0.98, img, False
+    ):
         this_echo_cost = "4"
-    elif find_pic(1690, 200, 1830, 240, f"COST1{info.adaptsResolution}.png", 0.98, img, False):
+    elif find_pic(
+        1690, 200, 1830, 240, f"COST1{info.adaptsResolution}.png", 0.98, img, False
+    ):
         this_echo_cost = "1"
-    elif find_pic(1690, 200, 1830, 240, f"COST3{info.adaptsResolution}.png", 0.98, img, False):
+    elif find_pic(
+        1690, 200, 1830, 240, f"COST3{info.adaptsResolution}.png", 0.98, img, False
+    ):
         this_echo_cost = "3"
 
     if this_echo_cost is None:
@@ -1104,7 +1190,9 @@ def echo_bag_lock():
     # 当配置文件每个套装的这个cost值需要的词条一条也没写，即都不需要，直接跳过，不检测主词条
     this_echo_cost_not_in_echo_config = True
     for cost_config_dict in config.EchoLockConfig.values():
-        this_echo_cost_not_in_echo_config &= len(cost_config_dict.get(this_echo_cost_key)) == 0
+        this_echo_cost_not_in_echo_config &= (
+            len(cost_config_dict.get(this_echo_cost_key)) == 0
+        )
     if this_echo_cost_not_in_echo_config:
         if config.EchoDebugMode:
             logger(f"[Cost {this_echo_cost}]声骸都不需要，下一个", "DEBUG")
@@ -1117,7 +1205,18 @@ def echo_bag_lock():
     if this_echo_cost == "4":  # 4COST描述太长，可能将副词条识别为主词条
         random_click(1510, 690)
         time.sleep(0.02)
-        if find_pic(1295, 465, 1360, 515, f"声骸_攻击{info.adaptsResolution}.png", 0.7, need_resize=False) is None:
+        if (
+            find_pic(
+                1295,
+                465,
+                1360,
+                515,
+                f"声骸_攻击{info.adaptsResolution}.png",
+                0.7,
+                need_resize=False,
+            )
+            is None
+        ):
             for i in range(18):
                 control.scroll(1, 1510 * width_ratio, 690 * height_ratio)
                 time.sleep(0.02)
@@ -1131,20 +1230,34 @@ def echo_bag_lock():
     }
     func, param = cost_mapping[this_echo_cost]
     text_result = wait_text_designated_area(func, param, region, 3)
-    if is_echo_ebug: print("\n wait_text_designated_area(0)" + str(text_result)) # 主词条识别失败Debug使用
+    if is_echo_ebug:
+        print(
+            "\n wait_text_designated_area(0)" + str(text_result)
+        )  # 主词条识别失败Debug使用
     this_echo_main_status = wait_text_result_search(text_result)
-    if is_echo_ebug: print("\n wait_text_result_search(text_result)(1)" + str(this_echo_main_status)) # 主词条识别失败Debug使用
+    if is_echo_ebug:
+        print(
+            "\n wait_text_result_search(text_result)(1)" + str(this_echo_main_status)
+        )  # 主词条识别失败Debug使用
     if this_echo_main_status is False:
         # 增加对衍射伤害及湮灭伤害的识别容错
-        text_result = wait_text_designated_area({'灭伤害加成','射伤害加成'}, 1, region, 3)
-        if is_echo_ebug: print("\n wait_text_designated_area(2)" + str(text_result)) # 主词条识别失败Debug使用
+        text_result = wait_text_designated_area(
+            {"灭伤害加成", "射伤害加成"}, 1, region, 3
+        )
+        if is_echo_ebug:
+            print(
+                "\n wait_text_designated_area(2)" + str(text_result)
+            )  # 主词条识别失败Debug使用
         if text_result.text == "灭伤害加成":
-            this_echo_main_status = "湮灭伤害加成"  
+            this_echo_main_status = "湮灭伤害加成"
         elif text_result.text == "行射伤害加成":
             this_echo_main_status = "衍射伤害加成"
         # elif text_result.text == "...":
         #     this_echo_main_status = "..."
-    if is_echo_ebug: print("\n this_echo_main_status(3)" + str(this_echo_main_status)) # 主词条识别失败Debug使用
+    if is_echo_ebug:
+        print(
+            "\n this_echo_main_status(3)" + str(this_echo_main_status)
+        )  # 主词条识别失败Debug使用
     this_echo_main_status = remove_non_chinese(this_echo_main_status)
     if config.EchoDebugMode:
         logger(f"当前声骸主词条为：{this_echo_main_status}", "DEBUG")
@@ -1157,8 +1270,12 @@ def echo_bag_lock():
     # 每个套装都需要这个cost对应的主属性，直接锁定，不检测套装属性
     echo_main_is_exist_in_all_set = True
     for cost_config_dict in config.EchoLockConfig.values():
-        echo_main_is_not_exist_in_all_set &= this_echo_main_status not in cost_config_dict.get(this_echo_cost_key)
-        echo_main_is_exist_in_all_set &= this_echo_main_status in cost_config_dict.get(this_echo_cost_key)
+        echo_main_is_not_exist_in_all_set &= (
+            this_echo_main_status not in cost_config_dict.get(this_echo_cost_key)
+        )
+        echo_main_is_exist_in_all_set &= this_echo_main_status in cost_config_dict.get(
+            this_echo_cost_key
+        )
     if echo_main_is_not_exist_in_all_set:
         if config.EchoDebugMode:
             logger(f"主属性[{str(this_echo_main_status)}]都不需要，下一个", "DEBUG")
@@ -1212,14 +1329,16 @@ def echo_bag_lock():
 
     # 声骸信息合成
     log_str = (
-            "" +
-            f"当前是第{info.echoNumber}个声骸" +
-            f"，{this_echo_cost}Cost" +
-            f"，{this_echo_set}" +
-            f"，{this_echo_main_status}"
+        ""
+        + f"当前是第{info.echoNumber}个声骸"
+        + f"，{this_echo_cost}Cost"
+        + f"，{this_echo_set}"
+        + f"，{this_echo_main_status}"
     )
     # 锁定声骸，输出声骸信息
-    if is_echo_main_status_valid(this_echo_set, this_echo_cost_key, this_echo_main_status, config.EchoLockConfig):
+    if is_echo_main_status_valid(
+        this_echo_set, this_echo_cost_key, this_echo_main_status, config.EchoLockConfig
+    ):
         if this_echo_lock is True:
             if config.EchoDebugMode:
                 logger("当前声骸符合要求，已处于锁定状态", "DEBUG")
@@ -1247,7 +1366,9 @@ def echo_next_row(echo_number):
     def scroll_and_check(min_times, max_times, message, check_condition):
         local_scroll_times = 0
         img = screenshot()
-        while local_scroll_times < min_times or (local_scroll_times < max_times and not check_condition(img)):
+        while local_scroll_times < min_times or (
+            local_scroll_times < max_times and not check_condition(img)
+        ):
             if config.EchoDebugMode:
                 logger(message, "DEBUG")
             control.scroll(-1, 1120 * width_ratio, 210 * height_ratio)
@@ -1258,7 +1379,16 @@ def echo_next_row(echo_number):
 
     def find_cost(img):
         for i in [1, 3, 4]:
-            if find_pic(315, 220, 360, 275, f"声骸行数滑动判断用COST{i}{info.adaptsResolution}.png", 0.8, img, False):
+            if find_pic(
+                315,
+                220,
+                360,
+                275,
+                f"声骸行数滑动判断用COST{i}{info.adaptsResolution}.png",
+                0.8,
+                img,
+                False,
+            ):
                 return True
         return False
 
@@ -1269,7 +1399,9 @@ def echo_next_row(echo_number):
         if config.EchoDebugMode:
             logger(f"已划出当前边缘,滑动次数：{scroll_times_out_edge}", "DEBUG")
 
-        scroll_times_next_edge = scroll_and_check(0, 4, "正在划到下一个边缘", lambda img: find_cost(img))
+        scroll_times_next_edge = scroll_and_check(
+            0, 4, "正在划到下一个边缘", lambda img: find_cost(img)
+        )
         time.sleep(0.3)
 
         if scroll_times_next_edge >= 4:
@@ -1300,28 +1432,58 @@ def remove_non_chinese(text):
     if not text:
         return False
     # 使用正则表达式匹配汉字，去除所有非汉字字符，包括括号
-    return re.sub(r'[^\u4e00-\u9fff]', '', text)
+    return re.sub(r"[^\u4e00-\u9fff]", "", text)
 
 
 def echo_synthesis():
     """
-        : 声骸合成锁定功能
-        : update: 2024/06/26 16:16:00
-        : author: RoseRin0
+    : 声骸合成锁定功能
+    : update: 2024/06/26 16:16:00
+    : author: RoseRin0
     """
-    is_synthesis_debug = False # Debug打印开关
+    is_synthesis_debug = False  # Debug打印开关
+
     def check_echo_cost():
         this_synthesis_echo_cost = None
         cost_img = screenshot()
-        if find_pic(1090, 210, 1240, 295, f"合成_COST1{info.adaptsResolution}.png", 0.98, cost_img, False):
+        if find_pic(
+            1090,
+            210,
+            1240,
+            295,
+            f"合成_COST1{info.adaptsResolution}.png",
+            0.98,
+            cost_img,
+            False,
+        ):
             this_synthesis_echo_cost = "1"
-        if find_pic(1075, 195, 1240, 295, f"合成_COST3{info.adaptsResolution}.png", 0.98, cost_img, False):
+        if find_pic(
+            1075,
+            195,
+            1240,
+            295,
+            f"合成_COST3{info.adaptsResolution}.png",
+            0.98,
+            cost_img,
+            False,
+        ):
             this_synthesis_echo_cost = "3"
-        if find_pic(1075, 195, 1240, 295, f"合成_COST4{info.adaptsResolution}.png", 0.98, cost_img, False):
+        if find_pic(
+            1075,
+            195,
+            1240,
+            295,
+            f"合成_COST4{info.adaptsResolution}.png",
+            0.98,
+            cost_img,
+            False,
+        ):
             this_synthesis_echo_cost = "4"
         if this_synthesis_echo_cost is None:
             logger("未能识别到Cost", "ERROR")
-            raise Exception('Cost识别失败，请检查是否使用推荐分辨率：\n  1920*1080分辨率1.0缩放\n  1600*900分辨率1.0缩放\n  1368*768分辨率1.0缩放\n  1280*720分辨率1.5缩放\n  1280*720分辨率1.0缩放')
+            raise Exception(
+                "Cost识别失败，请检查是否使用推荐分辨率：\n  1920*1080分辨率1.0缩放\n  1600*900分辨率1.0缩放\n  1368*768分辨率1.0缩放\n  1280*720分辨率1.5缩放\n  1280*720分辨率1.0缩放"
+            )
             # 识别失败返回false将抛出TypeError，在此处提醒使用适配完善的分辨率(ArcS17)
         if config.EchoSynthesisDebugMode:
             logger(f"当前声骸Cost为{this_synthesis_echo_cost}", "DEBUG")
@@ -1331,7 +1493,18 @@ def echo_synthesis():
         if this_synthesis_echo_cost == "4":  # 4COST描述太长，可能将副词条识别为主词条
             random_click(1000, 685)
             time.sleep(0.02)
-            if find_pic(715, 480, 770, 530, f"声骸_攻击{info.adaptsResolution}.png", 0.7, need_resize=False) is None:
+            if (
+                find_pic(
+                    715,
+                    480,
+                    770,
+                    530,
+                    f"声骸_攻击{info.adaptsResolution}.png",
+                    0.7,
+                    need_resize=False,
+                )
+                is None
+            ):
                 for i in range(18):
                     control.scroll(1, 1000 * width_ratio, 685 * height_ratio)
                     time.sleep(0.02)
@@ -1346,19 +1519,37 @@ def echo_synthesis():
         if this_synthesis_echo_cost in cost_mapping:
             func, param = cost_mapping[this_synthesis_echo_cost]
             text_result = wait_text_designated_area(func, param, region, 3)
-            if is_synthesis_debug: print("\n wait_text_designated_area(0)" + str(text_result)) # 主词条识别失败Debug使用
+            if is_synthesis_debug:
+                print(
+                    "\n wait_text_designated_area(0)" + str(text_result)
+                )  # 主词条识别失败Debug使用
             this_synthesis_echo_main_status = wait_text_result_search(text_result)
-            if is_synthesis_debug: print("\n wait_text_result_search(text_result)(1)" + str(this_synthesis_echo_main_status)) # 主词条识别失败Debug使用
-            #增加对衍射伤害及湮灭伤害的识别容错
+            if is_synthesis_debug:
+                print(
+                    "\n wait_text_result_search(text_result)(1)"
+                    + str(this_synthesis_echo_main_status)
+                )  # 主词条识别失败Debug使用
+            # 增加对衍射伤害及湮灭伤害的识别容错
             if this_synthesis_echo_main_status is False:
-                    text_result = wait_text_designated_area({'灭伤害加成','射伤害加成'}, 1, region, 3)
-                    if is_synthesis_debug: print("\n wait_text_designated_area(2)" + str(text_result)) # 主词条识别失败Debug使用
-                    if text_result.text == "灭伤害加成":
-                        this_synthesis_echo_main_status = "湮灭伤害加成"  
-                    elif text_result.text == "行射伤害加成":
-                        this_synthesis_echo_main_status = "衍射伤害加成"  
-                    if is_synthesis_debug: print("\n this_echo_main_status(3)" + str(this_synthesis_echo_main_status)) # 主词条识别失败Debug使用                   
-            this_synthesis_echo_main_status = remove_non_chinese(this_synthesis_echo_main_status )
+                text_result = wait_text_designated_area(
+                    {"灭伤害加成", "射伤害加成"}, 1, region, 3
+                )
+                if is_synthesis_debug:
+                    print(
+                        "\n wait_text_designated_area(2)" + str(text_result)
+                    )  # 主词条识别失败Debug使用
+                if text_result.text == "灭伤害加成":
+                    this_synthesis_echo_main_status = "湮灭伤害加成"
+                elif text_result.text == "行射伤害加成":
+                    this_synthesis_echo_main_status = "衍射伤害加成"
+                if is_synthesis_debug:
+                    print(
+                        "\n this_echo_main_status(3)"
+                        + str(this_synthesis_echo_main_status)
+                    )  # 主词条识别失败Debug使用
+            this_synthesis_echo_main_status = remove_non_chinese(
+                this_synthesis_echo_main_status
+            )
             if config.EchoSynthesisDebugMode:
                 logger(f"当前声骸主词条为：{this_synthesis_echo_main_status}", "DEBUG")
             return this_synthesis_echo_main_status
@@ -1375,14 +1566,20 @@ def echo_synthesis():
                 text_result = wait_text_designated_area(func, param, region, 3)
                 this_synthesis_echo_main_status = wait_text_result_search(text_result)
                 if this_synthesis_echo_main_status is False:
-                    text_result = wait_text_designated_area({'灭伤害加成','射伤害加成'}, 1, region, 3)
+                    text_result = wait_text_designated_area(
+                        {"灭伤害加成", "射伤害加成"}, 1, region, 3
+                    )
                     if text_result.text == "灭伤害加成":
-                        this_synthesis_echo_main_status = "湮灭伤害加成"  
+                        this_synthesis_echo_main_status = "湮灭伤害加成"
                     elif text_result.text == "行射伤害加成":
-                        this_synthesis_echo_main_status = "衍射伤害加成" 
-                this_synthesis_echo_main_status = remove_non_chinese(this_synthesis_echo_main_status)
+                        this_synthesis_echo_main_status = "衍射伤害加成"
+                this_synthesis_echo_main_status = remove_non_chinese(
+                    this_synthesis_echo_main_status
+                )
                 if config.EchoSynthesisDebugMode:
-                    logger(f"当前声骸主词条为：{this_synthesis_echo_main_status}", "DEBUG")
+                    logger(
+                        f"当前声骸主词条为：{this_synthesis_echo_main_status}", "DEBUG"
+                    )
                 return this_synthesis_echo_main_status
             else:
                 logger(f"声骸主词条识别错误", "ERROR")
@@ -1417,16 +1614,25 @@ def echo_synthesis():
                 logger(f"声骸套装识别错误", "ERROR")
                 return False
 
-    def lock_echo_synthesis(this_synthesis_echo_cost, this_synthesis_echo_main_status, this_synthesis_echo_set):
+    def lock_echo_synthesis(
+        this_synthesis_echo_cost,
+        this_synthesis_echo_main_status,
+        this_synthesis_echo_set,
+    ):
         log_str = (
-                "" +
-                f"当前是第{info.inSpecSynthesisEchoQuantity}个有效声骸" +
-                f"，{this_synthesis_echo_cost}Cost" +
-                f"，{this_synthesis_echo_set}" +
-                f"，{this_synthesis_echo_main_status}"
+            ""
+            + f"当前是第{info.inSpecSynthesisEchoQuantity}个有效声骸"
+            + f"，{this_synthesis_echo_cost}Cost"
+            + f"，{this_synthesis_echo_set}"
+            + f"，{this_synthesis_echo_main_status}"
         )
         this_synthesis_echo_cost = this_synthesis_echo_cost + "COST"
-        if is_echo_main_status_valid(this_synthesis_echo_set, this_synthesis_echo_cost, this_synthesis_echo_main_status, config.EchoLockConfig):
+        if is_echo_main_status_valid(
+            this_synthesis_echo_set,
+            this_synthesis_echo_cost,
+            this_synthesis_echo_main_status,
+            config.EchoLockConfig,
+        ):
             if config.EchoSynthesisDebugMode:
                 logger(f"当前声骸符合要求，锁定声骸", "DEBUG")
             log_str = log_str + "，执行锁定"
@@ -1438,7 +1644,9 @@ def echo_synthesis():
             if config.EchoSynthesisDebugMode:
                 logger(f"不符合，跳过", "DEBUG")
 
-    def check_synthesis_echo_level_and_quantity(first_index, echo_results, click_points):
+    def check_synthesis_echo_level_and_quantity(
+        first_index, echo_results, click_points
+    ):
         loop_times = None
         if first_index == 0:
             loop_times = 1
@@ -1452,7 +1660,9 @@ def echo_synthesis():
             echo_index_purple = echo_results[first_index + i]
             echo_index_gold = echo_results[first_index + i + length]
             if echo_index_purple:
-                logger(f"合成次数：{info.synthesisTimes}，当前已成功合成符合配置的金色声骸/已获得的金色声骸：{info.inSpecSynthesisEchoQuantity}/{info.synthesisGoldQuantity}个。")
+                logger(
+                    f"合成次数：{info.synthesisTimes}，当前已成功合成符合配置的金色声骸/已获得的金色声骸：{info.inSpecSynthesisEchoQuantity}/{info.synthesisGoldQuantity}个。"
+                )
             elif echo_index_gold:
                 info.synthesisGoldQuantity += 1
                 click_x, click_y = click_points[first_index + i]
@@ -1463,8 +1673,12 @@ def echo_synthesis():
                 this_echo_cost = check_echo_cost()
                 this_echo_main_status = check_echo_main_status(this_echo_cost)
                 this_echo_set = check_echo_set()
-                lock_echo_synthesis(this_echo_cost, this_echo_main_status, this_echo_set)
-                logger(f"合成次数：{info.synthesisTimes}，当前已成功合成符合配置的金色声骸/已获得的金色声骸：{info.inSpecSynthesisEchoQuantity}/{info.synthesisGoldQuantity}个。")
+                lock_echo_synthesis(
+                    this_echo_cost, this_echo_main_status, this_echo_set
+                )
+                logger(
+                    f"合成次数：{info.synthesisTimes}，当前已成功合成符合配置的金色声骸/已获得的金色声骸：{info.inSpecSynthesisEchoQuantity}/{info.synthesisGoldQuantity}个。"
+                )
                 control.esc()
                 time.sleep(1.5)
             else:
@@ -1480,16 +1694,26 @@ def echo_synthesis():
     # check_area_list = [(924, 577, 942, 596),
     #                    (856, 577, 871, 596), (995, 577, 1011, 596),
     #                    (790, 577, 804, 596), (923, 577, 942, 596), (1060, 577, 1080, 596)]
-    check_point_list = [(960, 591),
-                        (891, 591), (1028, 591),
-                        (823, 591), (960, 591), (1096, 591)]
-    click_point_list = [(960, 540),
-                        (891, 540), (1028, 540),
-                        (823, 540), (960, 540), (1096, 540)]
+    check_point_list = [
+        (960, 591),
+        (891, 591),
+        (1028, 591),
+        (823, 591),
+        (960, 591),
+        (1096, 591),
+    ]
+    click_point_list = [
+        (960, 540),
+        (891, 540),
+        (1028, 540),
+        (823, 540),
+        (960, 540),
+        (1096, 540),
+    ]
     purple = (255, 172, 255)
     gold = (255, 239, 171)
     results = []
-    #print(results) # Debug使用
+    # print(results) # Debug使用
     img = screenshot()
     for point in check_point_list:
         result = contrast_colors(point, purple, 0.85, False, img)
@@ -1498,35 +1722,54 @@ def echo_synthesis():
     for point in check_point_list:
         result = contrast_colors(point, gold, 0.85, False, img)
         results.append(result)
-    #print(results) # Debug用(AcS17)
+    # print(results) # Debug用(AcS17)
     if results[0] or results[0 + purple_length]:
         if results[3] is False and results[3 + purple_length] is False:
             if config.EchoSynthesisDebugMode:
                 true_count_purple = results[0:1].count(True)
-                true_count_gold = results[0 + purple_length:1 + purple_length].count(True)
-                logger(f"合成了1个声骸，其中紫色{true_count_purple}个，金色{true_count_gold}个。", "DEBUG")
+                true_count_gold = results[0 + purple_length : 1 + purple_length].count(
+                    True
+                )
+                logger(
+                    f"合成了1个声骸，其中紫色{true_count_purple}个，金色{true_count_gold}个。",
+                    "DEBUG",
+                )
             check_synthesis_echo_level_and_quantity(0, results, click_point_list)
         else:
             if config.EchoSynthesisDebugMode:
                 true_count_purple = results[3:6].count(True)
-                true_count_gold = results[3 + purple_length:6 + purple_length].count(True)
-                logger(f"合成了3个声骸，其中紫色{true_count_purple}个，金色{true_count_gold}个。", "DEBUG")
+                true_count_gold = results[3 + purple_length : 6 + purple_length].count(
+                    True
+                )
+                logger(
+                    f"合成了3个声骸，其中紫色{true_count_purple}个，金色{true_count_gold}个。",
+                    "DEBUG",
+                )
             check_synthesis_echo_level_and_quantity(3, results, click_point_list)
     elif results[1] or results[1 + purple_length]:
         if config.EchoSynthesisDebugMode:
             true_count_purple = results[1:3].count(True)
-            true_count_gold = results[1 + purple_length:3 + purple_length].count(True)
-            logger(f"合成了2个声骸，其中紫色{true_count_purple}个，金色{true_count_gold}个。", "DEBUG")
+            true_count_gold = results[1 + purple_length : 3 + purple_length].count(True)
+            logger(
+                f"合成了2个声骸，其中紫色{true_count_purple}个，金色{true_count_gold}个。",
+                "DEBUG",
+            )
         check_synthesis_echo_level_and_quantity(1, results, click_point_list)
     elif results[3] or results[3 + purple_length]:
         if config.EchoSynthesisDebugMode:
             true_count_purple = results[3:6].count(True)
-            true_count_gold = results[3 + purple_length:6 + purple_length].count(True)
-            logger(f"合成了3个声骸，其中紫色{true_count_purple}个，金色{true_count_gold}个。", "DEBUG")
+            true_count_gold = results[3 + purple_length : 6 + purple_length].count(True)
+            logger(
+                f"合成了3个声骸，其中紫色{true_count_purple}个，金色{true_count_gold}个。",
+                "DEBUG",
+            )
         check_synthesis_echo_level_and_quantity(3, results, click_point_list)
     else:
         logger("声骸识别出现问题(2)", "ERROR")
-        logger("\n合成结果识别失败，请检查是否使用推荐分辨率：\n  1920*1080分辨率1.0缩放\n  1600*900分辨率1.0缩放\n  1368*768分辨率1.0缩放\n  1280*720分辨率1.5缩放\n  1280*720分辨率1.0缩放", "WARN")
+        logger(
+            "\n合成结果识别失败，请检查是否使用推荐分辨率：\n  1920*1080分辨率1.0缩放\n  1600*900分辨率1.0缩放\n  1368*768分辨率1.0缩放\n  1280*720分辨率1.5缩放\n  1280*720分辨率1.0缩放",
+            "WARN",
+        )
         # 此处提醒使用适配完善的分辨率(ArcS17)
         return False
 
@@ -1543,16 +1786,27 @@ def wait_text_result_search(text_result):
         return False
 
 
-def is_echo_main_status_valid(this_echo_set, this_echo_cost, this_echo_main_status, echo_lock_config):
+def is_echo_main_status_valid(
+    this_echo_set, this_echo_cost, this_echo_main_status, echo_lock_config
+):
     if this_echo_set in echo_lock_config:
         if this_echo_cost in echo_lock_config[this_echo_set]:
-            return this_echo_main_status in echo_lock_config[this_echo_set][this_echo_cost]
+            return (
+                this_echo_main_status in echo_lock_config[this_echo_set][this_echo_cost]
+            )
     return False
 
 
-def find_pic(x_upper_left: int = None, y_upper_left: int = None,
-             x_lower_right: int = None, y_lower_right: int = None,
-             template_name: str = None, threshold: float = 0.8, img: np.ndarray = None, need_resize: bool = True):
+def find_pic(
+    x_upper_left: int = None,
+    y_upper_left: int = None,
+    x_lower_right: int = None,
+    y_lower_right: int = None,
+    template_name: str = None,
+    threshold: float = 0.8,
+    img: np.ndarray = None,
+    need_resize: bool = True,
+):
     if img is None:
         img = screenshot()
     region = None
@@ -1569,12 +1823,13 @@ def adapts():
 
     def calculate_distance(w1, h1, w2, h2):
         return ((w1 - w2) ** 2 + (h1 - h2) ** 2) ** 0.5
+
     if adapts_type is None:
-        if 1910 <= real_w <= 1930 and 1070 <= real_h <= 1090: # 判断适配1920*1080
+        if 1910 <= real_w <= 1930 and 1070 <= real_h <= 1090:  # 判断适配1920*1080
             logger("分辨率正确，使用原生坐标")
             info.adaptsType = 1
             info.adaptsResolution = "_1920_1080"
-        elif 1590 <= real_w <= 1610 and 890 <= real_h <= 910: # 判断适配1600*900
+        elif 1590 <= real_w <= 1610 and 890 <= real_h <= 910:  # 判断适配1600*900
             logger("分辨率正确，使用适配坐标")
             info.adaptsType = 2
             info.adaptsResolution = "_1600_900"
@@ -1582,16 +1837,19 @@ def adapts():
         #     logger("分辨率正确，使用通用坐标")
         #     info.adaptsType = 2
         #     info.adaptsResolution = "_1600_900"
-        elif 1360 <= real_w <= 1380 and 750 <= real_h <= 790: # 判断适配1366*768
+        elif 1360 <= real_w <= 1380 and 750 <= real_h <= 790:  # 判断适配1366*768
             logger("分辨率正确，使用适配坐标")
             info.adaptsType = 3
             info.adaptsResolution = "_1366_768"
-        elif 1270 <= real_w <= 1290 and 710 <= real_h <= 730: # 判断适配1280*720
+        elif 1270 <= real_w <= 1290 and 710 <= real_h <= 730:  # 判断适配1280*720
             logger("分辨率正确，使用适配坐标")
             info.adaptsType = 4
             info.adaptsResolution = "_1280_720"
         else:
-            logger("尝试使用相近分辨率，如有问题，请切换分辨率到 1920*1080*1.0 或者 1280*720*1.0", "WARN")
+            logger(
+                "尝试使用相近分辨率，如有问题，请切换分辨率到 1920*1080*1.0 或者 1280*720*1.0",
+                "WARN",
+            )
             info.adaptsType = 5
         if info.adaptsType == 5:
             distance_1920_1080 = calculate_distance(real_w, real_h, 1920, 1080)
@@ -1623,7 +1881,12 @@ def anti_stuck_monitor(img, anti_stuck_list: list, last_timestamp: int) -> int |
         return None
     height, width, channels = img.shape
     # 裁右下角，避开UID
-    region = (int(width * 0.89), int(height * 0.87), int(width * 0.98), int(height * 0.96))
+    region = (
+        int(width * 0.89),
+        int(height * 0.87),
+        int(width * 0.98),
+        int(height * 0.96),
+    )
     img_pil = Image.fromarray(img).crop(region)
     stuck_img = np.array(img_pil)
     result = ocr(stuck_img)
@@ -1656,6 +1919,22 @@ def anti_stuck_monitor(img, anti_stuck_list: list, last_timestamp: int) -> int |
     # 加载进度有不同值，说明没卡死
     if not is_stuck:
         return now_timestamp
-    logger(f"监测到游戏在{recent_timestamp - last_timestamp}s内连续卡在进度{last_percent}%, 关闭游戏", "WARN")
+    logger(
+        f"监测到游戏在{recent_timestamp - last_timestamp}s内连续卡在进度{last_percent}%, 关闭游戏",
+        "WARN",
+    )
     win32gui.SendMessage(hwnd, win32con.WM_CLOSE, 0, 0)
     return now_timestamp
+
+
+# 关闭窗口
+def close_window(class_name: str = "UnrealWindow", window_title: str = "鸣潮  "):
+    # 尝试关闭窗口，如果成功返回 True，否则返回 False
+    hwnd = win32gui.FindWindow(class_name, window_title)
+    if hwnd != 0:
+        win32gui.SendMessage(hwnd, win32con.WM_CLOSE, 0, 0)
+        # 等待窗口关闭
+        time.sleep(2)
+        if win32gui.FindWindow(class_name, window_title) == 0:
+            return True
+    return False

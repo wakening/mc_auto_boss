@@ -28,7 +28,13 @@ else:
 if current_process().name == "task":
     logger("OCR初始化中...")
     logging.disable(logging.WARNING)  # 关闭WARNING日志的打印
-    ocrIns = PaddleOCR(use_angle_cls=False, use_gpu=use_gpu, lang="ch", show_log=False)
+    ocrIns = PaddleOCR(
+        use_angle_cls=False,
+        use_gpu=use_gpu,
+        lang="ch",
+        show_log=False,
+        precision="int8",
+    )
 
 last_time = time.time()
 

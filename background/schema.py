@@ -5,8 +5,6 @@
 @time: 2024/6/4 上午10:18
 @author SuperLazyDog
 """
-import time
-
 from pydantic import BaseModel, Field
 from typing import Callable, Any, Dict, List
 from datetime import datetime
@@ -16,7 +14,8 @@ from PIL import Image
 import cv2
 from constant import width_ratio, height_ratio
 from status import logger, info
-from auto_yolo_switch import model_boss_yolo
+
+
 class Position(BaseModel):
     x1: int = Field(None, title="x1")
     y1: int = Field(None, title="y1")
@@ -70,7 +69,11 @@ class ImageMatch(BaseModel):
 
 
 def match_template(
-        img: np.ndarray, template_img: np.ndarray, region: tuple = None, threshold: float = 0.8, need_resize: bool = True
+    img: np.ndarray,
+    template_img: np.ndarray,
+    region: tuple = None,
+    threshold: float = 0.8,
+    need_resize: bool = True,
 ) -> None | ImgPosition:
     """
     使用 opencv matchTemplate 方法在指定区域内进行模板匹配并返回匹配结果
@@ -138,7 +141,8 @@ def text_match(textMatch: TextMatch, ocrResults: List[OcrResult]) -> Position | 
     for ocrResult in ocrResults:
         if textMatch.text.search(ocrResult.text):
             if textMatch.position is not None and not is_position_contained(
-                    textMatch.position, ocrResult.position,
+                textMatch.position,
+                ocrResult.position,
             ):
                 continue
             return ocrResult.position
@@ -152,10 +156,10 @@ def image_match(imageMatch: ImageMatch, img: np.ndarray) -> Position | None:
     :param img:  图片
     :return:
     """
-    imgPosition = match_template(img, imageMatch.image, imageMatch.confidence)
+    imgPosition = match_template(img, imageMatch.image, threshold=imageMatch.confidence)
     if imgPosition is not None:
         if imageMatch.position is not None and not is_position_contained(
-                imageMatch.position, imgPosition
+            imageMatch.position, imgPosition
         ):
             return None
         return imgPosition
@@ -184,36 +188,35 @@ class Page(BaseModel):
         页面匹配
         :param img: 游戏画面截图
         :param ocrResults:  游戏画面识别结果
-        :param execute:  是否执行操作
         :return:  bool
         """
         # 清空匹配位置
         self.matchPositions = {}
         for (
-                textMatch
+            textMatch
         ) in (
-                self.targetTexts
+            self.targetTexts
         ):  # 遍历目标文本 如果匹配到目标文本则记录位置 否则返回False
             if position := text_match(textMatch, ocrResults):
                 self.matchPositions[textMatch.name] = position
             else:
                 return False
         for (
-                textMatch
+            textMatch
         ) in self.excludeTexts:  # 遍历排除文本 如果匹配到排除文本则返回False
             if text_match(textMatch, ocrResults):
                 return False
         for (
-                imageMatch
+            imageMatch
         ) in (
-                self.targetImages
+            self.targetImages
         ):  # 遍历目标图片 如果匹配到目标图片则记录位置 否则返回False
             if position := image_match(imageMatch, img):
                 self.matchPositions[imageMatch.name] = position
             else:
                 return False
         for (
-                imageMatch
+            imageMatch
         ) in self.excludeImages:  # 遍历排除图片 如果匹配到排除图片则返回False
             if image_match(imageMatch, img):
                 return False
@@ -261,10 +264,10 @@ class Task(BaseModel):
 
     # 添加条件任务函数
     def add_conditional_actions(
-            self, condition: Callable[[], bool], actions: List[Callable[[], Any]]
+        self, condition: Callable[[], bool], action: Callable[[], Any]
     ):
         self.conditionalActions.append(
-            ConditionalAction(condition=condition, actions=actions)
+            ConditionalAction(condition=condition, action=action)
         )
 
     # 添加页面
@@ -279,7 +282,6 @@ class Task(BaseModel):
                 info.currentPageName = page.name
                 if page.name != "声骸":
                     logger(f"当前页面：{page.name}")
-                    model_boss_yolo(page.name)
                 page.action(page.matchPositions)
         for conditionalAction in self.conditionalActions:
             match_conditional_action = conditionalAction()

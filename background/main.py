@@ -1,10 +1,7 @@
-import os
+import time
+
 import init  # !!此导入删除会导致不会将游戏移动到左上角以及提示当前分辨率!!
 import pyautogui
-import time
-import win32api
-import win32con
-import win32gui
 import threading
 import sys
 import version
@@ -16,19 +13,20 @@ from schema import Task
 import subprocess
 from task import boss_task, synthesis_task, echo_bag_lock_task
 from utils import *
-from threading import Event as event
 from config import config
 from collections import OrderedDict
 from cmd_line import get_cmd_task_opts
-from read_crashes_data import read_crashes_datas,is_app_crashes,is_app_crashes_init
+from read_crashes_data import is_app_crashes_init
+from constant import class_name, window_title
 
 
-
-os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
+os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 hwnds = win32gui.FindWindow("UnrealWindow", "鸣潮")
 app_path = config.AppPath
-IMAGE_NAME_UE4_CRASH = os.path.join(config.project_root, "message.png") # 崩溃的图片，在项目根目录
+# 崩溃的图片，在项目根目录
+IMAGE_NAME_UE4_CRASH = os.path.join(config.project_root, "message.png")
+
 
 # 关闭UE4崩溃弹窗
 def find_and_press_enter():
@@ -37,52 +35,41 @@ def find_and_press_enter():
             x, y = pyautogui.locateCenterOnScreen(IMAGE_NAME_UE4_CRASH, confidence=0.8)
             if x is not None and y is not None:
                 time.sleep(1)
-                pyautogui.press('enter')
-        except Exception as e:
+                pyautogui.press("enter")
+        except Exception:
             time.sleep(config.UE4_POPUP)
 
-def restart_app(e: event):
+
+def restart_app(e: Event):
     if app_path:
         while True:
             # 定时重启功能设置已加入config.yaml(ArcS17)
             if config.RestartWutheringWaves:
                 time.sleep(config.RestartWutheringWavesTime)
-                manage_application("UnrealWindow", "鸣潮  ", app_path,e)
-            time.sleep(config.GameMonitorTime)  # 每秒检测一次，游戏窗口   改为用户自己设置监控间隔时间，默认为5秒，减少占用(RoseRin)
-            find_game_windows("UnrealWindow", "鸣潮  ", e)
-            
+                manage_application(e)
+            # 每秒检测一次，游戏窗口   改为用户自己设置监控间隔时间，默认为5秒，减少占用(RoseRin)
+            time.sleep(config.GameMonitorTime)
+            find_game_windows(e)
 
-def find_ue4(class_name, window_title):
-    if app_path:
-        ue4windows = win32gui.FindWindow(class_name, window_title)
-        if ue4windows != 0:  # 检测到游戏发生崩溃-UE4弹窗
-            logger("UE4-Client Game已崩溃，尝试重启游戏......")
-            win32gui.SendMessage(ue4windows, win32con.WM_CLOSE, 0, 0)
-            # 等待崩溃窗口关闭
-            time.sleep(2)
-            if win32gui.FindWindow(class_name, window_title) == 0:
-                return True
-        else:
-            return False
 
-def find_game_windows(class_name, window_title, taskEvent):
+def find_game_windows(e: Event):
     if app_path:
         gameWindows = win32gui.FindWindow(class_name, window_title)
         # 没有检测到游戏窗口
         if gameWindows == 0:
             logger("未找到游戏窗口")
-            while not restart_application(app_path):  # 如果启动失败，则五秒后重新启动游戏窗口
+            while not restart_application():  # 如果启动失败，则五秒后重新启动游戏窗口
                 logger("启动失败，五秒后尝试重新启动...")
             # 运行方法一需要有前提条件
             # 如果重启成功，执行方法一
             time.sleep(15)
-            taskEvent.clear()  # 清理BOSS脚本线程(防止多次重启线程占用-导致无法点击进入游戏)
-           
+            e.clear()  # 清理BOSS脚本线程(防止多次重启线程占用-导致无法点击进入游戏)
             logger("自动启动BOSS脚本")
-            time.sleep(10) # 增加重启线程延时避免重启游戏加载过程中仍无法截取游戏窗口(ArcS17)
-            thread = Process(target=run, args=(boss_task, taskEvent), name="task")
+            # 增加重启线程延时避免重启游戏加载过程中仍无法截取游戏窗口(ArcS17)
+            time.sleep(10)
+            thread = Process(target=run, args=(boss_task, e), name="task")
             thread.start()
-        else:  
+        else:
             # 检查到游戏窗口
             # 这段代码的功能是检查一个名为 "isCrashes.txt" 的文件是否存在于项目的根目录下。
             # 如果文件存在，它会读取文件内容并判断是否为 "True" 或 "False"。
@@ -90,11 +77,9 @@ def find_game_windows(class_name, window_title, taskEvent):
             is_app_crashes_init(False)
 
 
-
-def close_window(class_name, window_title):
+def close_window():
     # 尝试关闭窗口，如果成功返回 True，否则返回 False
-    hwnd = win32gui.FindWindow(class_name, window_title)
-    if hwnd != 0:
+    if win32gui.FindWindow(class_name, window_title) != 0:
         win32gui.SendMessage(hwnd, win32con.WM_CLOSE, 0, 0)
         # 等待窗口关闭
         time.sleep(2)
@@ -103,7 +88,7 @@ def close_window(class_name, window_title):
     return False
 
 
-def restart_application(app_path):
+def restart_application():
     if app_path:
         time.sleep(5)
         # 尝试启动应用程序，如果成功返回 True，否则返回 False
@@ -124,22 +109,22 @@ def restart_application(app_path):
             return False
 
 
-def manage_application(class_name, window_title, app_path, taskEvent):
+def manage_application(e: Event):
     if app_path:
         # 先停止脚本
         logger("自动暂停脚本！")
-        taskEvent.clear()
+        e.clear()
         while True:
-            if close_window(class_name, window_title):
+            if close_window():
                 # 如果关闭成功，尝试重启应用程序
                 logger("窗口关闭成功，正在尝试重新启动...")
-                while not restart_application(app_path):
+                while not restart_application():
                     logger("启动失败，五秒后尝试重新启动...")
                 # 运行方法一需要有前提条件
                 # 如果重启成功，执行方法一
                 time.sleep(20)
                 logger("自动启动BOSS脚本")
-                thread = Process(target=run, args=(boss_task, taskEvent), name="task")
+                thread = Process(target=run, args=(boss_task, e), name="task")
                 thread.start()
                 break
             else:
@@ -148,7 +133,7 @@ def manage_application(class_name, window_title, app_path, taskEvent):
                     logger("关闭失败，窗口仍然存在，正在尝试重新关闭...")
                 else:
                     logger("窗口已不存在，尝试重启...")
-                    while not restart_application(app_path):
+                    while not restart_application():
                         logger("启动失败，五秒后尝试重新启动...")
                     break
 
@@ -160,10 +145,12 @@ def set_console_title(title: str):
     ctypes.windll.kernel32.SetConsoleTitleW(title)
 
 
-set_console_title(f"鸣潮自动工具ver {version.__version__}   ---此软件为免费的开源软件 谨防倒卖！")
+set_console_title(
+    f"鸣潮自动工具ver {version.__version__}   ---此软件为免费的开源软件 谨防倒卖！"
+)
 
 
-def run(task: Task, e: event):
+def run(task: Task, e: Event):
     """
     运行
     :return:
@@ -209,9 +196,10 @@ def on_press(key):
         logger("启动融合脚本")
         try:
             input(
-                "启动融合脚本之前请确保已锁定现有的有用声骸，并确认使用已适配分辨率：\n  1920*1080分辨率1.0缩放\n  1600*900分辨率1.0缩放\n  1368*768分辨率1.0缩放\n  1280*720分辨率1.5缩放\n  1280*720分辨率1.0缩放\n  回车确认 Enter..."
+                "启动融合脚本之前请确保已锁定现有的有用声骸，并确认使用已适配分辨率：\n  1920*1080分辨率1.0缩放\n  1600*900分辨率1.0缩放\n  1368*768分辨率1.0缩放\n  "
+                "1280*720分辨率1.5缩放\n  1280*720分辨率1.0缩放\n  回车确认 Enter..."
             )
-        except Exception:
+        except:
             pass
         mouseResetEvent.set()
         time.sleep(1)
@@ -235,8 +223,8 @@ def on_press(key):
         logger("请等待程序退出后再关闭窗口...")
         taskEvent.clear()
         mouseResetEvent.set()
-        restart_thread.terminate() # 杀死默认开启状态的检测窗口的线程
-        if config.DetectionUE4:  # 检测UE4窗口崩溃时开启状态的时候，才杀死该线程  
+        restart_thread.terminate()  # 杀死默认开启状态的检测窗口的线程
+        if config.DetectionUE4:  # 检测UE4窗口崩溃时开启状态的时候，才杀死该线程
             find_crash_popup_thread.terminate()
         return False
     return None
@@ -285,12 +273,11 @@ if __name__ == "__main__":
         target=restart_app, args=(taskEvent,), name="restart_event"
     )
     restart_thread.start()
-   
+
     if config.DetectionUE4:
-            # 创建并启动线程-检查UE4崩溃弹窗
-            find_crash_popup_thread = Process(
-            target=find_and_press_enter)
-            find_crash_popup_thread.start()
+        # 创建并启动线程-检查UE4崩溃弹窗
+        find_crash_popup_thread = Process(target=find_and_press_enter)
+        find_crash_popup_thread.start()
     if app_path:
         logger(f"游戏路径：{config.AppPath}")
     else:
@@ -304,7 +291,9 @@ if __name__ == "__main__":
         "--------------------------------------------------------------\n"
     )
     print("请确认已经配置好了config.yaml文件\n")
-    print("使用说明：\n   F5  启动脚本\n   F6  合成声骸\n   F7  暂停运行\n   F8  锁定声骸\n   F12 停止运行")
+    print(
+        "使用说明：\n   F5  启动脚本\n   F6  合成声骸\n   F7  暂停运行\n   F8  锁定声骸\n   F12 停止运行"
+    )
     logger("开始运行")
     run_cmd_tasks_async()
     with Listener(on_press=on_press) as listener:

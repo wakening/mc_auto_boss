@@ -26,18 +26,19 @@ class Config(BaseModel):
     LogFilePath: Optional[str] = Field(None, title="日志文件路径")
 
     # 游戏崩溃捕获及处理
-    RebootScreenshot: bool = Field(False, title="是否在游戏窗口存在但截取图像失败后重启")
-    RestartWutheringWaves: bool = Field(False, title="定时重启游戏以避免游戏卡10%、75%等特殊进度")
+    RestartWutheringWaves: bool = Field(
+        False, title="定时重启游戏以避免游戏卡10%、75%等特殊进度"
+    )
     RestartWutheringWavesTime: int = Field(7200, title="游戏自动重启间隔时间")
     RebootCount: int = Field(0, title="截取窗口失败次数")
     DetectionUE4: bool = Field(True, title="是否检测UE4崩溃")
-    ISLoadingJue: bool = Field(False, title="卡加载进度开关")
-    ISLoadingTimeout: int = Field(8, title="卡加载超时时间")
     UE4_POPUP: int = Field(30, title="UE4崩溃弹窗检测间隔时间")
 
     # 控制台信息
     EchoDebugMode: bool = Field(True, title="声骸锁定功能DEBUG显示输出的开关")
-    EchoSynthesisDebugMode: bool = Field(True, title="声骸合成锁定功能DEBUG显示输出的开关")
+    EchoSynthesisDebugMode: bool = Field(
+        True, title="声骸合成锁定功能DEBUG显示输出的开关"
+    )
 
     # 自动战斗及声骸锁定配置
     MaxFightTime: int = Field(120, title="最大战斗时间")
@@ -52,7 +53,9 @@ class Config(BaseModel):
     WaitUltAnimation: bool = Field(False, title="是否等待大招时间")
     EchoLock: bool = Field(False, title="是否启用锁定声骸功能")
     EchoLockConfig: Dict[str, Dict[str, List[str]]] = Field(default_factory=dict)
-    EchoMaxContinuousLockQuantity: int = Field(5, title="最大连续检测到已锁定声骸的数量")
+    EchoMaxContinuousLockQuantity: int = Field(
+        5, title="最大连续检测到已锁定声骸的数量"
+    )
 
     # 战斗策略
     TargetBoss: list[str] = Field([], title="目标关键字")
@@ -101,7 +104,7 @@ def get_wuthering_waves_path():
 
     key_paths = [
         r"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\KRInstall Wuthering Waves",
-        r"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\KRInstall Wuthering Waves Overseas"
+        r"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\KRInstall Wuthering Waves Overseas",
     ]
 
     for key_path in key_paths:
@@ -113,14 +116,16 @@ def get_wuthering_waves_path():
                 install_path, _ = winreg.QueryValueEx(key, "InstallPath")
                 if install_path:
                     # 构造完整的程序路径
-                    program_path = os.path.join(install_path, "Wuthering Waves Game", "Wuthering Waves.exe")
+                    program_path = os.path.join(
+                        install_path, "Wuthering Waves Game", "Wuthering Waves.exe"
+                    )
                     # print(f"从注册表中加载到游戏目录：{program_path}")
                     return program_path
             except Exception as e:
                 # print(f"构建安装路径错误: {e}")
                 pass
             finally:
-                if 'key' in locals():
+                if "key" in locals():
                     key.Close()
 
     return None
@@ -135,15 +140,15 @@ else:
     config = Config()
     # with open(config_path, "w", encoding="utf-8") as f:
     #     yaml.safe_dump(config.dict(), f)
-    '''
+    """
     若初始化时config文件不存在将复制example自动生成config文件
     替代之版本yaml函数读取无注释字符串流版本的无格式config文件
     并提醒用户配置文件
-    '''
-    config_example = os.path.join(config.project_root, 'config.example.yaml') 
-    config_auto = os.path.join(config.project_root, 'config.yaml') 
-    with open(config_example, 'rb') as source_file:
-        with open(config_auto, 'wb') as dest_file:
+    """
+    config_example = os.path.join(config.project_root, "config.example.yaml")
+    config_auto = os.path.join(config.project_root, "config.yaml")
+    with open(config_example, "rb") as source_file:
+        with open(config_auto, "wb") as dest_file:
             shutil.copyfileobj(source_file, dest_file)
     print("\n未找到配置文件，已按example为模板自动生成，请进行配置")
 
@@ -154,7 +159,9 @@ if len(config.TargetBoss) == 0:
 # 加载声骸锁定配置文件
 if config.EchoLock:
     if os.path.exists(os.path.join(root_path, "echo_config.yaml")):
-        with open(os.path.join(root_path, "echo_config.yaml"), "r", encoding="utf-8") as f:
+        with open(
+            os.path.join(root_path, "echo_config.yaml"), "r", encoding="utf-8"
+        ) as f:
             echo_config_data = yaml.safe_load(f)
             config.EchoLockConfig = echo_config_data.get("EchoLockConfig", {})
         # 补齐数据结构，保证该有的key和value都有，将没有的值赋为空数组而非None，

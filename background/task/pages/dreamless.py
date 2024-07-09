@@ -11,10 +11,9 @@ import time
 from . import *
 from datetime import timedelta
 
-#防止卡加载
-import is_loading
+# 防止卡加载
 from config import config
-import threading
+
 pages = []
 
 
@@ -93,11 +92,21 @@ def recommended_level_action(positions: dict[str, Position]) -> bool:
     """
     interactive()
     if info.DungeonWeeklyBossLevel != 0:
-        dungeon_weekly_boss_level = info.DungeonWeeklyBossLevel  # 如果已有自动搜索结果，那么直接使用自动搜索的结果值
-    elif config.DungeonWeeklyBossLevel is None or config.DungeonWeeklyBossLevel < 40 or config.DungeonWeeklyBossLevel % 10 != 0:
-        dungeon_weekly_boss_level = 40  # 如果没有自动搜索的结果，且没有Config值或为值异常，则从40开始判断
+        dungeon_weekly_boss_level = (
+            info.DungeonWeeklyBossLevel
+        )  # 如果已有自动搜索结果，那么直接使用自动搜索的结果值
+    elif (
+        config.DungeonWeeklyBossLevel is None
+        or config.DungeonWeeklyBossLevel < 40
+        or config.DungeonWeeklyBossLevel % 10 != 0
+    ):
+        dungeon_weekly_boss_level = (
+            40  # 如果没有自动搜索的结果，且没有Config值或为值异常，则从40开始判断
+        )
     else:
-        dungeon_weekly_boss_level = config.DungeonWeeklyBossLevel  # 如果没有自动搜索的结果，但有Config值且不为默认值，则使用Config值
+        dungeon_weekly_boss_level = (
+            config.DungeonWeeklyBossLevel
+        )  # 如果没有自动搜索的结果，但有Config值且不为默认值，则使用Config值
     result = wait_text("推荐等级" + str(dungeon_weekly_boss_level))
     if not result:
         for i in range(1, 5):
@@ -147,8 +156,6 @@ def start_challenge_action(positions: dict[str, Position]) -> bool:
     position = positions["开启挑战"]
     click_position(position)
     time.sleep(0.5)
-    if config.ISLoadingJue:
-        is_loading.isNumber_isloading_disPlays(0.2)
     info.lastFightTime = datetime.now()
     return True
 
@@ -211,13 +218,6 @@ def confirm_leave_action(positions: dict[str, Position]) -> bool:
     """
     click_position(positions["确认"])
     time.sleep(0.5)
-    if config.ISLoadingJue:
-        is_loading.isNumber_isloading_disPlays(0.2)
-    # # 检测到卡加载界面
-    # if is_loading.check_results():
-    #     # 关闭鸣潮弹窗
-    #     is_loading.close_window("UnrealWindow", "鸣潮  ")
-
     wait_home()
     logger(f"{info.lastBossName}副本结束")
     time.sleep(2)

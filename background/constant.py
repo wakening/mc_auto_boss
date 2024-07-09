@@ -29,6 +29,8 @@ def wait_exit():
     sys.exit(0)
 
 
+class_name = "UnrealWindow"
+window_title = "鸣潮  "
 hwnd = win32gui.FindWindow("UnrealWindow", "鸣潮  ")
 if hwnd == 0:
     print("未找到游戏窗口")
