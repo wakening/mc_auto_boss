@@ -4,7 +4,7 @@ ModelName: "yolo" # 默认无需设置，已实现自动匹配声骸模型
 OcrInterval: 0 # OCR识别间隔时间
 GameMonitorTime: 5 # 游戏窗口检测间隔时间
 LogFilePath: # 日志保存路径，留空即为项目根目录，如需设置，则需为"c:\\mc_log.txt"格式，使用"\\"而不是"\"
-
+IntelligentSceneSwitching: true #智能场景调度-进BOSS使用GPU,其他情况使用CPU(实验性功能)
 # 游戏崩溃捕获及处理
 RebootScreenshot: true # 是否在游戏窗口存在但截取失败后重启
 RestartWutheringWaves: false # 定时重启游戏以避免游戏卡10%、75%等特殊进度及UE4崩溃，与DetectionUE4开启任一
