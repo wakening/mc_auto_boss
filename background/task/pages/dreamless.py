@@ -16,7 +16,8 @@ import is_loading
 from config import config
 import threading
 pages = []
-
+#动态调度
+from ocr import init_ocr,ocr_switch_gpu,ocr_switch_cpu
 
 # 进入
 def enter_action_dreamless(positions: dict[str, Position]) -> bool:
@@ -147,6 +148,8 @@ def start_challenge_action(positions: dict[str, Position]) -> bool:
     position = positions["开启挑战"]
     click_position(position)
     time.sleep(0.5)
+    ocr_switch_gpu()
+    init_ocr()
     if config.ISLoadingJue:
         is_loading.isNumber_isloading_disPlays(0.2)
     info.lastFightTime = datetime.now()
@@ -211,6 +214,8 @@ def confirm_leave_action(positions: dict[str, Position]) -> bool:
     """
     click_position(positions["确认"])
     time.sleep(0.5)
+    ocr_switch_cpu()
+    init_ocr()
     if config.ISLoadingJue:
         is_loading.isNumber_isloading_disPlays(0.2)
     # # 检测到卡加载界面
