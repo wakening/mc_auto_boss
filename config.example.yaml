@@ -11,7 +11,7 @@ RestartWutheringWaves: false # 定时重启游戏以避免游戏卡10%、75%等�
 RestartWutheringWavesTime: 7200 # 单位为秒，如7200秒且RestartWutheringWaves为True即两小时重启一次
 DetectionUE4: true # 是否检测UE4崩溃窗口，推荐开启True 
 UE4_POPUP: 30 # UE4崩溃窗口检测的间隔时间，默认30秒检测一次
-ISLoadingJue: true #卡加载进度开关-支持显示加载进度
+ISLoadingJue: true #卡加载进度开关-支持显示加载进度(只适配了1920*1080  1280*720)
 ISLoadingTimeout: 8 # 卡加载进度超时时间(秒)-请勿遮挡右下角进度值区域
 
 # 控制台信息
