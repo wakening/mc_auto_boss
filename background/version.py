@@ -1,11 +1,11 @@
 __version__ = "1.2.3"
-release_date = "2024-07-09"
+release_date = "2024-07-11"
 description = "更新"
 
 # ver1.2.3
-# update:2024-07-09
+# update:2024-07-11
 # updated by wangll5t
-# 1.新增智能场景动态切换GPU/CPU识别的功能，有效的缓解GPU爆显存的问题
+# 1.新增智能场景动态切换GPU/CPU识别的功能-功能性开关
 # 2.在config.yaml配置，实现性功能
 
 
