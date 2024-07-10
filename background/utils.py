@@ -259,10 +259,10 @@ def transfer_to_boss(bossName):
         click_position(transfer.position)
         logger("等待传送完成")
         # time.sleep(0.1)
-        ocr_switch_gpu()
-        init_ocr()
         if config.ISLoadingJue:
-            is_loading.isNumber_isloading_disPlays(0.2)
+            is_loading.isNumber_isloading_disPlays(0.01)
+        ocr_switch_gpu()
+        init_ocr()    
         wait_home()  # 等待回到主界面
         logger("传送完成")
         now = datetime.now()
@@ -303,10 +303,10 @@ def transfer_to_dreamless():
         click_position(transfer.position)
         logger("等待传送完成")
         time.sleep(0.2)
-        ocr_switch_gpu()
-        init_ocr()
         if config.ISLoadingJue:
-            is_loading.isNumber_isloading_disPlays(0.2)
+            is_loading.isNumber_isloading_disPlays(0.01)
+        ocr_switch_gpu()
+        init_ocr()    
         wait_home()  # 等待回到主界面
         logger("传送完成")
         time.sleep(2)
