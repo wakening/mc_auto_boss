@@ -1,6 +1,6 @@
 # 脚本基础配置
 AppPath: # 游戏路径，如需设置，使用"\\"而不是"\" ,留空为从注册表读取游戏运行目录，无法读取注册表，且此值为空时无法在崩溃时自动重启游戏。
-ModelName: "yolo" # 默认无需设置，已实现自动匹配声骸模型
+ModelName: "yolo" #  已实现动态切换模型文件，默认情况下无需修改，heart无妄者心脏模型       jue 角模型          yolo 默认的模型
 OcrInterval: 0 # OCR识别间隔时间
 GameMonitorTime: 5 # 游戏窗口检测间隔时间
 LogFilePath: # 日志保存路径，留空即为项目根目录，如需设置，则需为"c:\\mc_log.txt"格式，使用"\\"而不是"\"
@@ -9,10 +9,10 @@ IntelligentSceneSwitching: true #智能场景调度-进BOSS使用GPU,其他情�
 RebootScreenshot: true # 是否在游戏窗口存在但截取失败后重启
 RestartWutheringWaves: false # 定时重启游戏以避免游戏卡10%、75%等特殊进度及UE4崩溃，与DetectionUE4开启任一
 RestartWutheringWavesTime: 7200 # 单位为秒，如7200秒且RestartWutheringWaves为True即两小时重启一次
-DetectionUE4: True # 是否检测UE4崩溃窗口，推荐开启True 
+DetectionUE4: true # 是否检测UE4崩溃窗口，推荐开启True 
 UE4_POPUP: 30 # UE4崩溃窗口检测的间隔时间，默认30秒检测一次
-ISLoadingJue: True #卡加载检测开关-支持显示加载进度,RestartWutheringWaves与ISLoadingJue二选一
-ISLoadingTimeout: 12 # 卡加载进度超时时间(秒)
+ISLoadingJue: true #卡加载进度开关-支持显示加载进度
+ISLoadingTimeout: 8 # 卡加载进度超时时间(秒)-请勿遮挡右下角进度值区域
 
 # 控制台信息
 EchoDebugMode: true #声骸锁定功能DEBUG显示输出的开关
