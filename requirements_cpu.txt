@@ -8,8 +8,8 @@ pyyaml
 pydantic
 onnxruntime
 paddlepaddle
-paddleocr
+paddleocr<2.8.0
 colorama
 requests
 pyautogui
-pytesseract
+psutil

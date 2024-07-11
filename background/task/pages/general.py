@@ -40,6 +40,7 @@ update_game_exit_page = Page(
 )
 pages.append(update_game_exit_page)
 
+
 # 吸收声骸
 def absorption_action(positions: dict[str, Position]) -> bool:
     """
@@ -204,7 +205,7 @@ def click_receive_monthly_card_rewards(positions: dict[str, Position]) -> bool:
     time.sleep(0.5)
     control.click(960 * width_ratio, 540 * height_ratio)
     time.sleep(0.5)
-    control.click(960 * width_ratio, 540 * height_ratio) # 两次点击保证退出月卡界面
+    control.click(960 * width_ratio, 540 * height_ratio)  # 两次点击保证退出月卡界面
     return True
 
 
@@ -255,7 +256,8 @@ def receive_rewards(positions: dict[str, Position]) -> bool:
     :return:
     """
     control.esc()  # 退出
-    time.sleep(2)
+    time.sleep(1)
+    control.esc()
     return True
 
 
@@ -427,7 +429,9 @@ def account_login_action(positions: dict[str, Position]) -> bool:
                 return False
             # 文本相对于登录框的位置
             # logger(f"position: {ocr_text_result.position}")
-            click_position_in_login_hwnd(ocr_text_result.position, specified_hwnd=ck_login_hwnd)
+            click_position_in_login_hwnd(
+                ocr_text_result.position, specified_hwnd=ck_login_hwnd
+            )
         except Exception as e:
             pass
         time.sleep(3)
@@ -467,7 +471,6 @@ account_login_page = Page(
             name="登入",
             text="登入",
         ),
-
     ],
     excludeTexts=[
         TextMatch(
@@ -478,4 +481,3 @@ account_login_page = Page(
     action=account_login_action,
 )
 pages.append(account_login_page)
-
