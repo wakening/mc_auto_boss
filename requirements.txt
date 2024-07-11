@@ -8,7 +8,7 @@ pyyaml
 pydantic
 onnxruntime-gpu
 paddlepaddle-gpu
-paddleocr
+paddleocr<2.8.0 # 2.8.0版本异常爆显存
 colorama
 requests
 pyautogui
