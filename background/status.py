@@ -29,7 +29,6 @@ battle_count, absorb_count, heal_count = read_crashes_datas()
 
 class StatusInfo(BaseModel):
     
-    useGpu:bool = Field(True, title="是否使用GPU识别")
     roleIndex: int = Field(0, title="角色索引")
     bossIndex: int = Field(0, title="boss索引")
     status: Status = Field(Status.idle, title="状态")
