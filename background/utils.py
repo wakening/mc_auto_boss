@@ -745,9 +745,14 @@ def absorption_and_receive_rewards(positions: dict[str, Position]) -> bool:
         return False
     logger("吸收声骸")
     info.absorptionCount += 1
+    absorption_rate = (
+        info.absorptionCount/info.fightCount 
+        if info.absorptionCount/info.fightCount <= 1 
+        else 1
+    )
     logger(
         f"目前声骸吸收率为："
-        + str(format(info.absorptionCount / info.fightCount * 100, ".2f"))
+        + str(format(absorption_rate * 100, ".2f"))
         + "%",
         "DEBUG",
     )
