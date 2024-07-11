@@ -34,7 +34,6 @@ class Config(BaseModel):
     ISLoadingJue: bool = Field(False, title="卡加载进度开关")
     ISLoadingTimeout: int = Field(8, title="卡加载超时时间")
     UE4_POPUP: int = Field(30, title="UE4崩溃弹窗检测间隔时间")
-    IntelligentSceneSwitching: bool = Field(False, title="智能场景调度-进BOSS使用GPU,其他情况使用CPU")
 
     # 控制台信息
     EchoDebugMode: bool = Field(True, title="声骸锁定功能DEBUG显示输出的开关")

@@ -13,4 +13,3 @@ colorama
 requests
 pyautogui
 pytesseract
-psutil
