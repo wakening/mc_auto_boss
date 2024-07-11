@@ -6,12 +6,10 @@ from config import config
 # 读取崩溃后的的值
 
 
-
-
 def get_crashes_value():
     try:
         if os.path.exists(config.LogFilePath):
-            with open(config.LogFilePath, "r", encoding="utf-8",errors='ignore') as f:
+            with open(config.LogFilePath, "r", encoding="utf-8", errors="ignore") as f:
                 lines = f.readlines()
 
             for line in reversed(lines):
@@ -89,11 +87,11 @@ def is_app_crashes_init(isFileExist_TORF: bool):
 def read_crashes_datas():
     is_crashes = is_app_crashes()
     if is_crashes:  # 游戏发生了崩溃-读取文本-True
-        battle_count, absorb_count, heal_count = (
-            get_crashes_value()
+        battle_count, absorb_count, heal_count = get_crashes_value()
+        print(
+            f"\n崩溃前战斗次数为：{battle_count}，吸收次数为：{absorb_count}，治疗次数为：{heal_count}"
         )
-        print(f"\n崩溃前战斗次数为：{battle_count}，吸收次数为：{absorb_count}，治疗次数为：{heal_count}")
-          # 读取崩溃后日志中保存的数据，作为日志输出
+        # 读取崩溃后日志中保存的数据，作为日志输出
         return battle_count, absorb_count, heal_count
         # info.fightCount = battle_count # 战斗次数
         # info.absorptionCount = absorb_count # 吸收次数
