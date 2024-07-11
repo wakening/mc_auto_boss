@@ -5,6 +5,7 @@
 @time: 2024/6/8 下午10:08
 @author SuperLazyDog
 """
+import sys
 import time
 
 from . import *
@@ -132,3 +133,28 @@ get_echoes_page = Page(
 )
 
 pages.append(get_echoes_page)
+
+
+def echo_not_enough_action(positions: dict[str, Position]) -> bool:
+    """
+    获取回音
+    :param positions:
+    :return:
+    """
+    logger("合成结束")
+    sys.exit(0)
+    return True
+
+
+echo_not_enough_page = Page(
+    name="材料不足",
+    targetTexts=[
+        TextMatch(
+            name="材料不足",
+            text="材料不足",
+        ),
+    ],
+    action=echo_not_enough_action,
+)
+
+pages.append(echo_not_enough_page)

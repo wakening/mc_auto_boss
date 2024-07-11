@@ -26,7 +26,8 @@ def get_crashes_value():
                     if battle_count >= 1 and absorb_count >= 0 and heal_count >= 0:
                         return battle_count, absorb_count, heal_count
     except Exception as e:
-        return 0, 0, 0
+        pass
+    return 0, 0, 0
 
 
 # battle_count, absorb_count, heal_count = getCrashesValue()
