@@ -308,22 +308,22 @@ def transfer_to_boss(bossName):
     time.sleep(1)
     # control.click(1700 * width_ratio, 980 * height_ratio)
     random_click(1700, 980)
-    if not wait_text("追踪"):
+    if not wait_text("追踪", timeout=5):
         logger("未找到追踪", "WARN")
         control.esc()
         return False
     # control.click(960 * width_ratio, 540 * height_ratio)
     random_click(960, 540)
-    beacon = wait_text("借位信标")
+    beacon = wait_text("借位信标", timeout=5)
     if not beacon:
         logger("未找到借位信标", "WARN")
         control.esc()
         return False
     click_position(beacon.position)
-    if transfer := wait_text("快速旅行"):
+    if transfer := wait_text("快速旅行", timeout=5):
         click_position(transfer.position)
+        time.sleep(0.5)
         logger("等待传送完成")
-        # time.sleep(0.1)
         wait_home()  # 等待回到主界面
         logger("传送完成")
         now = datetime.now()
@@ -363,7 +363,7 @@ def transfer_to_dreamless():
     if transfer := wait_text("快速旅行"):
         click_position(transfer.position)
         logger("等待传送完成")
-        time.sleep(0.2)
+        time.sleep(0.5)
         wait_home()  # 等待回到主界面
         logger("传送完成")
         time.sleep(2)
@@ -409,13 +409,10 @@ def transfer() -> bool:
         return True
     if info.lastBossName == "角" and bossName == "角":
         logger("前往角 且 刚才已经前往过")
-        control.tap("a")
-        control.tap("a")
-        time.sleep(0.2)
-        control.tap("s")
-        control.tap("s")
-        control.tap("s")
-        control.tap("s")
+        time.sleep(0.5)
+        control.key_press(win32con.VK_LSHIFT) # 左shift向后闪避接触交互
+        time.sleep(0.1)
+        control.key_release(win32con.VK_LSHIFT)
         now = datetime.now()
         info.idleTime = now  # 重置空闲时间
         info.lastFightTime = now  # 重置最近检测到战斗时间
@@ -600,7 +597,7 @@ def find_text_in_login_hwnd(targets: str | list[str], login_hwnd) -> OcrResult |
     return None
 
 
-def wait_text(targets: str | list[str], timeout: int = 3) -> OcrResult | None:
+def wait_text(targets: str | list[str], timeout: int = 5) -> OcrResult | None:
     start = datetime.now()
     if isinstance(targets, str):
         targets = [targets]
