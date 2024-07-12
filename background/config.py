@@ -53,6 +53,8 @@ class Config(BaseModel):
     WaitUltAnimation: bool = Field(False, title="是否等待大招时间")
     EchoLock: bool = Field(False, title="是否启用锁定声骸功能")
     EchoLockConfig: Dict[str, Dict[str, List[str]]] = Field(default_factory=dict)
+    EnhancedComputing: bool = Field(False, title="是否启用声骇强化计分")
+    ComputeRoleName: str = Field("默认", title="声骇强化计分的角色名称")
     EchoMaxContinuousLockQuantity: int = Field(
         5, title="最大连续检测到已锁定声骸的数量"
     )

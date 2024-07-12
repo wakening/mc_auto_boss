@@ -12,6 +12,7 @@ from .pages.dreamless import pages as dreamless_pages
 from .conditional_actions.boss import conditional_actions
 from .pages.synthesis import pages as synthesis_pages
 from .pages.echo_bag_lock import pages as echo_bag_lock_pages
+from .pages.compute import pages as compute_pages
 
 # 合并所有页面
 boss_task = Task()
@@ -23,3 +24,6 @@ synthesis_task.pages = synthesis_pages  # 合成页面
 
 echo_bag_lock_task = Task()
 echo_bag_lock_task.pages = echo_bag_lock_pages  # 声骸背包页面
+
+compute_task = Task()
+compute_task.pages = compute_pages  # 计算页面

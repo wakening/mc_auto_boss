@@ -26,6 +26,7 @@ from schema import Position
 from datetime import datetime
 from yolo import search_echoes
 from echo import echo
+from caculate import calculate_total_weight
 
 
 def interactive():
@@ -1940,3 +1941,90 @@ def close_window(class_name: str = "UnrealWindow", window_title: str = "鸣潮  
         if win32gui.FindWindow(class_name, window_title) == 0:
             return True
     return False
+
+# 声骇得分计算
+def role_equip_points():
+    is_echo_ebug = False  # Debug打印开关
+
+    if not config.EnhancedComputing:
+        logger("未启动该功能", "WARN")
+        return False
+
+    logger("默认按正常比例适配计算，如需计算特殊角色，请前往配置文件中配置", "WARN")
+
+    logger("目前支持特殊计算角色：\n -今夕 \n - 忌炎  ")
+    role_name = config.ComputeRoleName
+    max_attempts = 10
+    retry_interval = 5
+
+    logger("共进行{}次尝试，每隔{}秒进行一次识别，请在一次识别后手动选择另一个声骇".format(max_attempts, retry_interval), "DEBUG")
+
+    for attempt in range(max_attempts):
+        img = screenshot()
+        if img is None:
+            time.sleep(0.2)
+            continue
+
+        img_entry = img[205:320, 965:1220]
+        img_pil2 = img[100:160, 930:1000]
+
+        result = ocr(img_pil2)
+
+        up = 0
+        for item in result:
+            if "+" in item.text:
+                try:
+                    up = int(item.text.split("+")[1])
+                except ValueError:
+                    up = 0
+                break
+
+        result = ocr(img_entry)
+
+        if not result:
+            for _ in range(3):
+                logger("声骸识别失败，尝试重新识别", "WARN")
+                result = ocr(img_entry)
+                if result:
+                    break
+
+            if not result:
+                logger("声骸识别失败，请检查截图", "WARN")
+                return False
+
+        if up < 10:
+            result = result[:2]
+        elif up < 15:
+            result = result[:4]
+        elif up < 20:
+            result = result[:6]
+        elif up < 25:
+            result = result[:8]
+        elif up == 25:
+            result = result[:10]
+
+        paired_results = []
+        for i in range(0, len(result), 2):
+            if i + 1 < len(result):
+                if "骸" in result[i].text:
+                    break  # 检测到“骸”字，结束循环
+                if "攻击" in result[i].text and "%" in result[i+1].text:
+                    paired_results.append(("大" + result[i].text, result[i+1].text))
+                else:
+                    paired_results.append((result[i].text, result[i+1].text))
+        if not paired_results:
+            logger("声骸识别失败，请检查截图", "WARN")
+            return False
+
+        print("\n---------------------------------------------------------- \n")
+        total_weight, adjusted_total_weight, max_total_weight, max_adjusted_total_weight  = calculate_total_weight(paired_results, role_name)
+        if adjusted_total_weight is not None:
+            print(f"当前声骸等级{up},正常期望最高分为：{max_total_weight}，计算得分为：{total_weight}，角色{role_name}期望最高分为：{max_adjusted_total_weight}，角色{role_name}计算得分为：{adjusted_total_weight}")
+        else:
+            print(f"当前声骸等级{up},正常期望最高分为：{max_total_weight}，计算得分为：{total_weight}")
+        print("\n----------------------------------------------------------- \n")
+        time.sleep(retry_interval)
+
+    return False
+
+# 可以根据需要添加更多角色和对应的加成类型
