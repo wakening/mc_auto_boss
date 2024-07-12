@@ -600,7 +600,7 @@ def find_text_in_login_hwnd(targets: str | list[str], login_hwnd) -> OcrResult |
     return None
 
 
-def wait_text(targets: str | list[str], timeout: int = 3) -> OcrResult | None:
+def wait_text(targets: str | list[str], timeout: int = 5) -> OcrResult | None:
     start = datetime.now()
     if isinstance(targets, str):
         targets = [targets]
