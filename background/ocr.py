@@ -5,6 +5,7 @@
 @time: 2024/6/5 下午4:36
 @author SuperLazyDog
 """
+import os
 import time
 import paddle
 from paddleocr import PaddleOCR
@@ -24,6 +25,7 @@ if paddle.is_compiled_with_cuda() and paddle.get_device().startswith(
     use_gpu = True
 else:
     use_gpu = False
+    os.environ['FLAGS_use_mkldnn'] = '1'  # CPU启用mkldnn加速
 
 if current_process().name == "task":
     logger("OCR初始化中...")
