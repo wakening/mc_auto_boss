@@ -423,8 +423,8 @@ def transfer() -> bool:
     control.tap(win32con.VK_F2)
     time.sleep(1)
     if not wait_text(
-        ["日志", "活跃", "挑战", "强者", "残象", "周期", "探寻", "漂泊"], timeout=5
-    ):
+        ["日志", "活跃", "挑战", "强者", "残象", "周期", "探寻", "漂泊"], timeout=7
+    ):  
         logger("未进入索拉指南", "WARN")
         control.esc()
         info.lastFightTime = datetime.now()
@@ -615,6 +615,7 @@ def wait_text(targets: str | list[str], timeout: int = 5) -> OcrResult | None:
         for target in targets:
             if text_info := search_text(result, target):
                 return text_info
+        # print(f"ocr是否识别成功:{text_info}") # ocr debug使用
 
         time.sleep(0.1)  # 每次截图和 OCR 处理之间增加一个短暂的暂停时间
     return None
