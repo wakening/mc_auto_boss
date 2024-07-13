@@ -90,8 +90,17 @@
    | `a~2`        | 按下鼠标左键2秒,  |
    | `e~2`        | 按下E键2秒,    |
 
+7. ### 非NVIDIA显卡需切换依赖
+   非N卡用户在完成GPU环境搭建以及项目配置后
+   在项目路径内打开终端逐行执行如下命令即可完成依赖切换并正常使用
+    ```shell
+    conda activate mc
+    pip uninstall onnxruntime-gpu
+    pip uninstall paddlepaddle-gpu
+    pip install -r requirements_cpu.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+    ```
 
-7. ### todo
+8. ### todo
 	* ~~优化内存占用~~
 	* ~~记录战斗次数及吸取次数~~
 	* ~~掉落声骸目标识别进行拾取~~
