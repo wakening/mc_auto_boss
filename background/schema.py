@@ -14,7 +14,7 @@ from PIL import Image
 import cv2
 from constant import width_ratio, height_ratio
 from status import logger, info
-
+from auto_yolo_switch import model_boss_yolo
 
 class Position(BaseModel):
     x1: int = Field(None, title="x1")
@@ -282,6 +282,7 @@ class Task(BaseModel):
                 info.currentPageName = page.name
                 if page.name != "声骸":
                     logger(f"当前页面：{page.name}")
+                    model_boss_yolo(page.name) # 切换模型
                 page.action(page.matchPositions)
         for conditionalAction in self.conditionalActions:
             match_conditional_action = conditionalAction()

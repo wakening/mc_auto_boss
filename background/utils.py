@@ -371,6 +371,7 @@ def transfer_to_dreamless():
         info.idleTime = now  # 重置空闲时间
         info.lastFightTime = now  # 重置最近检测到战斗时间
         info.fightTime = now  # 重置战斗时间
+        time.sleep(1)
         for i in range(5):
             forward()
             time.sleep(0.1)
