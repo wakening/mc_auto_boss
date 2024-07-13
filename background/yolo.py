@@ -28,6 +28,21 @@ if current_process().name == "task":
     label_name = model.get_outputs()[0].name
 
 
+def switch_model(ModelName):
+    global model
+    global input_name
+    global label_name
+    global provider
+    model_path = os.path.join(root_path, "models/" + ModelName + ".onnx")
+
+    model = None
+    if current_process().name == "task":
+        model = rt.InferenceSession(model_path, providers=provider)
+        input_name = model.get_inputs()[0].name
+        label_name = model.get_outputs()[0].name
+
+
+
 def _update_labels(labels, ratio, padw, padh):
     """Update labels."""
     labels["instances"].convert_bbox(format="xyxy")
