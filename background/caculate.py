@@ -13,10 +13,6 @@ class AttributeWeight(Enum):
   共鸣解放伤害加成 = 0.5
   共鸣效率 = 0.5
 
-# 打印所有枚举成员
-for attr in AttributeWeight:
-  print(f"{attr.name}: {attr.value}")
-
 def calculate_total_weight(paired_results, character_name=""):
   total_weight = 0.0
   adjusted_total_weight = 0.0
@@ -42,7 +38,7 @@ def calculate_total_weight(paired_results, character_name=""):
       numeric_value_match = re.search(r'\d+(\.\d+)?', value)
       if numeric_value_match:
         numeric_value = float(numeric_value_match.group())
-        print(f"{attribute}: {weight} * {numeric_value}")
+        print(f"{attribute}: {value}")
         total_weight += weight * numeric_value
         adjusted_total_weight += adjusted_weight * numeric_value
         # 计算最大值
