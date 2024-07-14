@@ -636,6 +636,7 @@ def wait_home(timeout=120) -> bool:
             raise Exception("等待回到主界面超时")
         img = screenshot()
         if img is None:
+            time.sleep(0.3)
             continue
         results = ocr(img)
         if search_text(results, "特征码"):  # 特征码
@@ -650,6 +651,7 @@ def wait_home(timeout=120) -> bool:
         template = np.array(template)
         if match_template(img, template, threshold=0.9):
             return True
+        time.sleep(0.3)
 
 
 def turn_to_search() -> int | None:
