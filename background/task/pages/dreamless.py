@@ -217,7 +217,7 @@ def confirm_leave_action(positions: dict[str, Position]) -> bool:
     :return:
     """
     click_position(positions["确认"])
-    time.sleep(0.5)
+    time.sleep(3)
     wait_home()
     logger(f"{info.lastBossName}副本结束")
     time.sleep(2)
