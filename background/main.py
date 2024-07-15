@@ -11,7 +11,7 @@ from multiprocessing import Event, Process
 from pynput.keyboard import Key, Listener
 from schema import Task
 import subprocess
-from task import boss_task, synthesis_task, echo_bag_lock_task
+from task import boss_task, synthesis_task, echo_bag_lock_task, compute_task
 from utils import *
 from config import config
 from collections import OrderedDict
@@ -219,6 +219,17 @@ def on_press(key):
         mouse_reset_thread.join()
         thread = Process(target=run, args=(echo_bag_lock_task, taskEvent), name="task")
         thread.start()
+    if key == Key.f9:
+        try:
+            logger("声骇得分计算启动，请确认当前处于角色声骇详情页")
+            thread = Process(target=run, args=(compute_task, taskEvent), name="task")
+            thread.start()
+        except Exception as e:
+            logger(f"发生错误: {e}", "ERROR")
+            taskEvent.clear()
+            mouseResetEvent.set()
+            restart_thread.terminate()  # 杀死默认开启状态的检测窗口的线程
+            sys.exit(1)
     if key == Key.f12:
         logger("请等待程序退出后再关闭窗口...")
         taskEvent.clear()
@@ -292,7 +303,7 @@ if __name__ == "__main__":
     )
     print("请确认已经配置好了config.yaml文件\n")
     print(
-        "使用说明：\n   F5  启动脚本\n   F6  合成声骸\n   F7  暂停运行\n   F8  锁定声骸\n   F12 停止运行"
+        "使用说明：\n   F5  启动脚本\n   F6  合成声骸\n   F7  暂停运行\n   F8  锁定声骸\n   F9  声骇得分计算\n   F12 停止运行"
     )
     logger("开始运行")
     run_cmd_tasks_async()
