@@ -45,8 +45,9 @@ class Config(BaseModel):
     MaxIdleTime: int = Field(10, title="最大空闲时间", ge=5)
     MaxSearchEchoesTime: int = Field(18, title="最大搜索声骸时间")
     SelectRoleInterval: int = Field(2, title="选择角色间隔时间", ge=2)
-    DungeonWeeklyBossWaitTime: int = Field(0, title="周本(副本)boss额外等待时间")
     DungeonWeeklyBossLevel: int = Field(40, title="周本(副本)boss等级")
+    BossWaitTime_Dreamless: float = Field(3, title="进入-无妄者-周本等待时间")
+    BossWaitTime_Jue: float = Field(2, title="进入-角-周本等待时间")
     SearchEchoes: bool = Field(False, title="是否搜索声骸")
     SearchDreamlessEchoes: bool = Field(True, title="是否搜索无妄者")
     CharacterHeal: bool = Field(True, title="是否判断角色是否阵亡")
@@ -163,9 +164,10 @@ if len(config.TargetBoss) == 0:
 
 # 加载声骸锁定配置文件
 if config.EchoLock:
-    if os.path.exists(os.path.join(root_path, "echo_config.yaml")):
+    echo_config_path = os.path.join(root_path, "echo_config.yaml")
+    if os.path.exists(echo_config_path):
         with open(
-            os.path.join(root_path, "echo_config.yaml"), "r", encoding="utf-8"
+            echo_config_path, "r", encoding="utf-8"
         ) as f:
             echo_config_data = yaml.safe_load(f)
             config.EchoLockConfig = echo_config_data.get("EchoLockConfig", {})
@@ -184,5 +186,5 @@ if config.EchoLock:
                     echo_set_dict[cost + "COST"] = []
         # print("\n" + str(config.EchoLockConfig))
     else:
-        print("缺少声骸配置文件")
+        print("缺少声骸配置文件，请复制example文件进行配置，目标文件路径：%s" % echo_config_path)
         wait_exit()
