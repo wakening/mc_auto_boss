@@ -29,6 +29,9 @@ official_login_hwnd_title = ""
 # b服登录窗口
 bilibili_login_hwnd_class_name = "CLoginDlg_P_8340_\\d{10}"  # CLoginDlg_P_8340_1720374432
 bilibili_login_hwnd_title = "bilibili游戏 登录_弹框"
+# UE4-Client崩溃窗口
+ue4_client_hwnd_class_name = "#32770"
+ue4_client_hwnd_title = "UE4-Client Game已崩溃，即将关闭"
 
 
 def get_pid_by_exe_name(exe_name: str):
@@ -105,3 +108,14 @@ def get_login_hwnd_bilibili():
             # print(f"window class: {window_class}, title: {win32gui.GetWindowText(wd_hwnd)}")
             return wd_hwnd
     return None
+
+
+# UE4-Client Game已崩溃窗口句柄 by wakening
+def get_ue4_client_crash_hwnd():
+    windows_list: list = get_all_hwnd()
+    for wd_hwnd in windows_list:
+        title = win32gui.GetWindowText(wd_hwnd)
+        if title is not None and title == ue4_client_hwnd_title:
+            return wd_hwnd
+    return None
+
