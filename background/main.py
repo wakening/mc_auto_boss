@@ -164,17 +164,24 @@ def run(task: Task, e: Event):
 
     logger("卡加载监测启动")
     anti_stuck_list = []
-    last_timestamp = int(time.time())
+    last_anti_stuck_timestamp = int(time.time())
+    logger("UE4崩溃监测启动")
+    last_check_ue4_timestamp = int(time.time())
 
     while e.is_set():
+        # 监测UE4-Client Game已崩溃弹窗，发现就关闭弹窗，干掉游戏进程
+        check_timestamp = ue4_client_crash_monitor(last_check_ue4_timestamp)
+        if check_timestamp is not None:
+            last_check_ue4_timestamp = check_timestamp
+
         img = screenshot()
         result = ocr(img)
         task(img, result)
 
         # 监测游戏是否卡加载，长时间卡在加载界面就干掉游戏进程
-        check_timestamp = anti_stuck_monitor(img, anti_stuck_list, last_timestamp)
+        check_timestamp = anti_stuck_monitor(img, anti_stuck_list, last_anti_stuck_timestamp)
         if check_timestamp is not None:
-            last_timestamp = check_timestamp
+            last_anti_stuck_timestamp = check_timestamp
     logger("进程停止运行")
 
 

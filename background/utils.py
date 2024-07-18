@@ -13,6 +13,7 @@ import os
 import win32con
 import numpy as np
 import itertools
+import hwnd_util
 from PIL import Image, ImageGrab
 from ctypes import windll
 from typing import List, Tuple, Union
@@ -1931,6 +1932,27 @@ def anti_stuck_monitor(img, anti_stuck_list: list, last_timestamp: int) -> int |
         "WARN",
     )
     win32gui.SendMessage(hwnd, win32con.WM_CLOSE, 0, 0)
+    return now_timestamp
+
+
+# 监测UE4-Client Game已崩溃弹窗，发现就关闭弹窗，干掉游戏进程 by wakening
+def ue4_client_crash_monitor(last_timestamp: int) -> int | None:
+    now_timestamp = int(time.time())
+    # 隔一段时间(秒)收集一次
+    if now_timestamp - last_timestamp < 60:
+        return None
+    ue4_client_crash_hwnd = hwnd_util.get_ue4_client_crash_hwnd()
+    if ue4_client_crash_hwnd is None:
+        # logger("没找到崩溃窗口")
+        return now_timestamp
+    logger("监测到UE4-Client Game已崩溃，关闭游戏", "WARN")
+    try:
+        win32gui.SendMessage(ue4_client_crash_hwnd, win32con.WM_CLOSE, 0, 0)
+        time.sleep(1)
+        win32gui.SendMessage(hwnd, win32con.WM_CLOSE, 0, 0)
+        time.sleep(1)
+    except Exception as e:
+        logger(f"关闭窗口时发生异常: {e}", "ERROR")
     return now_timestamp
 
 
