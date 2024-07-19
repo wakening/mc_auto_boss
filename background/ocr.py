@@ -29,9 +29,9 @@ else:
 
 if current_process().name == "task":
     if use_gpu:
-        logger("正在使用GPU加速，OCR初始化中...")
+        logger("正在使用GPU加速，OCR初始化中...","DEBUG")
     else:
-        logger("正在使用CPU，OCR初始化中...")
+        logger("正在使用CPU，OCR初始化中...","DEBUG")
     logging.disable(logging.WARNING)  # 关闭WARNING日志的打印
     ocrIns = PaddleOCR(
         use_angle_cls=False,

@@ -1,9 +1,17 @@
-__version__ = "1.2.4"
-release_date = "2024-07-16"
+__version__ = "1.2.5"
+release_date = "2024-07-19"
 description = "更新"
 
+# ver1.2.5
+# update:2024-07-19
+# updated by ArcS17
+# 1.连招支持闪避动作: l(小写L)
+# 2.首次治疗传送自动调整地图缩放 From RinRose0
+# 3.加快搜索声骸镜头重置
+# 4.增加大招动画等待所支持分辨率
+
 # ver1.2.4
-# update:2024-07-08
+# update:2024-07-16
 # updated by ArcS17
 # 1.新增指定周本Boss等待时间
 # 2.新增声骸文件配置提醒
