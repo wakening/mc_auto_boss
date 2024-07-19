@@ -105,6 +105,13 @@ class Control:
         win32gui.PostMessage(self.hwnd, win32con.WM_KEYDOWN, key, 0)
         time.sleep(np.random.uniform(0, 0.01))  # 按键时间 不确定是否需要
         win32gui.PostMessage(self.hwnd, win32con.WM_KEYUP, key, 0)
+        
+    # 左SHIFT/鼠标右键为闪避 此处使用左SHIFT
+    def dodge(self):
+        win32gui.PostMessage(self.hwnd, win32con.WM_KEYDOWN, win32con.VK_LSHIFT, 0)
+        time.sleep(0.1) # 按键时间
+        win32gui.PostMessage(self.hwnd, win32con.WM_KEYUP, win32con.VK_LSHIFT, 0)
+        time.sleep(0.2)
 
     def esc(self):
         win32gui.PostMessage(self.hwnd, win32con.WM_KEYDOWN, win32con.VK_ESCAPE, 0)

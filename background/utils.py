@@ -125,6 +125,8 @@ def release_skills():
                 elif tactic == "s":
                     # control.space()
                     control.fight_space()
+                elif tactic == "l":
+                    control.dodge() # 闪避
                 elif tactic == "r":  # 大招时判断是否释放
                     control.fight_tap(tactic)
                     time.sleep(0.2)
@@ -173,6 +175,8 @@ def release_skills():
                         control.fight_click()
                     elif tactic == "s":
                         control.fight_space()
+                    elif tactic == "l":
+                        control.dodge() # 闪避
                     else:
                         control.fight_tap(tactic)
         except Exception as e:
@@ -413,9 +417,7 @@ def transfer() -> bool:
     if info.lastBossName == "角" and bossName == "角":
         logger("前往角 且 刚才已经前往过")
         time.sleep(0.5)
-        control.key_press(win32con.VK_LSHIFT) # 左shift向后闪避接触交互
-        time.sleep(0.1)
-        control.key_release(win32con.VK_LSHIFT)
+        control.dodge() # 闪避功能已重写为函数
         now = datetime.now()
         info.idleTime = now  # 重置空闲时间
         info.lastFightTime = now  # 重置最近检测到战斗时间
@@ -481,7 +483,7 @@ def screenshot() -> np.ndarray | None:
         except Exception as e:
             logger(f"清理截图资源失败: {e}", "ERROR")
         # 重试，若失败多次重新启动游戏以唤醒至前台
-        if config.RebootCount < 5:
+        if config.RebootCount < 3:
             time.sleep(1)
             return screenshot()  # 截取失败，重试
         else:
@@ -600,7 +602,7 @@ def find_text_in_login_hwnd(targets: str | list[str], login_hwnd) -> OcrResult |
     return None
 
 
-def wait_text(targets: str | list[str], timeout: int = 5) -> OcrResult | None:
+def wait_text(targets: str | list[str], timeout: int = 3) -> OcrResult | None:
     start = datetime.now()
     if isinstance(targets, str):
         targets = [targets]
@@ -674,7 +676,7 @@ def turn_to_search() -> int | None:
             return
         logger("未发现声骸,转动视角")
         control.tap("a")
-        time.sleep(1)
+        time.sleep(0.5)
         control.mouse_middle()
         time.sleep(1)
     return x
@@ -801,6 +803,25 @@ def transfer_to_heal(healBossName: str = "朔雷之鳞"):
         logger("治疗_未找到追踪", "WARN")
         control.esc()
         return False
+    # 首次进行治疗时先进行地图缩放 From Rin
+    region = set_region(1625, 895, 1885, 1050)
+    if info.healCount == 0: 
+        i = 0
+        while not wait_text_designated_area("自定义标记", region=region):
+            random_click(960, 300)
+            time.sleep(0.5)
+            i += 1
+            if i > 3:
+                for _ in range(2):
+                    control.esc()
+                    time.sleep(0.5)
+                logger("地图缩放时出现问题，退出地图界面", "DEBUG")
+                return
+        for _ in range(5):
+            control.scroll(3, 960 * width_ratio, 540 * height_ratio)
+            time.sleep(0.2)
+            logger("正在对地图进行缩放","DEBUG")
+        time.sleep(0.5)  
     # control.click(1210 * width_ratio, 525 * height_ratio)
     random_click(1210, 525)
     if transfer := wait_text("快速旅行"):
