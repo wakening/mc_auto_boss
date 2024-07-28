@@ -445,6 +445,37 @@ def transfer() -> bool:
         return transfer_to_boss(bossName)
 
 
+# boss传送跳过动画 by wakening
+def rumi_transfer_rumi(boss_index) -> bool:
+    bossName = config.TargetBoss[boss_index % len(config.TargetBoss)]
+    control.activate()
+    time.sleep(3)
+    control.tap("m")
+    time.sleep(1)
+    random_click(960, 540)
+    beacon = wait_text("借位信标", timeout=5)
+    if not beacon:
+        logger("未找到借位信标", "WARN")
+        control.esc()
+        return False
+    click_position(beacon.position)
+    if transfer := wait_text("快速旅行", timeout=5):
+        click_position(transfer.position)
+        time.sleep(0.5)
+        logger("等待传送完成")
+        wait_home()  # 等待回到主界面
+        logger("传送完成")
+        now = datetime.now()
+        info.idleTime = now  # 重置空闲时间
+        info.lastFightTime = now  # 重置最近检测到战斗时间
+        info.fightTime = now  # 重置战斗时间
+        info.lastBossName = bossName
+        info.waitBoss = True
+        return True
+    control.esc()
+    return False
+
+
 def screenshot() -> np.ndarray | None:
     """
     截取当前窗口的屏幕图像。
@@ -1046,8 +1077,11 @@ def boss_wait(bossName):
         return False
 
     if contains_any_combinations(bossName, keywords_turtle, min_chars=2):
-        logger("龟龟需要等待16秒开始战斗！", "DEBUG")
-        time.sleep(16)
+        # logger("龟龟需要等待16秒开始战斗！", "DEBUG")
+        tst = int(time.time())
+        trans_success = rumi_transfer_rumi(info.bossIndex - 1)
+        if not trans_success:
+            time.sleep(max(0, 16 - int(time.time()) + tst))
     elif contains_any_combinations(bossName, keywords_robot, min_chars=2):
         logger("机器人需要等待7秒开始战斗！", "DEBUG")
         time.sleep(7)
