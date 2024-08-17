@@ -1285,7 +1285,7 @@ def echo_bag_lock():
                 time.sleep(0.02)
             time.sleep(0.8)
             random_click(1510, 690)
-    region = set_region(1425, 425, 1620, 470)
+    region = set_region(1366, 425, 1620, 470)
     cost_mapping = {
         "1": (echo.echoCost1MainStatus, 1),
         "3": (echo.echoCost3MainStatus, 1),
@@ -1573,7 +1573,7 @@ def echo_synthesis():
                     time.sleep(0.02)
                 time.sleep(0.8)
                 random_click(1000, 685)
-        region = set_region(830, 440, 1250, 485)
+        region = set_region(768, 440, 1050, 485)
         cost_mapping = {
             "1": (echo.echoCost1MainStatus, 1),
             "3": (echo.echoCost3MainStatus, 1),
