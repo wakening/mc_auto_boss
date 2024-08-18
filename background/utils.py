@@ -93,7 +93,12 @@ def select_role(reset_role: bool = False):
         info.roleIndex += 1
         if info.roleIndex > 3:
             info.roleIndex = 1
-    control.tap(str(info.roleIndex))
+    if len(config.FightOrder) == 1:
+        config.FightOrder.append(2)
+    if len(config.FightOrder) == 2:
+        config.FightOrder.append(3)
+    select_role_index = config.FightOrder[info.roleIndex - 1]
+    control.tap(str(select_role_index))
 
 
 def release_skills():
@@ -780,12 +785,14 @@ def absorption_and_receive_rewards(positions: dict[str, Position]) -> bool:
     if count == 0:
         return False
     logger("吸收声骸")
-    info.absorptionCount += 1
-    absorption_rate = (
-        info.absorptionCount/info.fightCount 
-        if info.absorptionCount/info.fightCount <= 1 
-        else 1
-    )
+    if info.fightCount is None or info.fightCount == 0:
+        info.fightCount = 1
+        info.absorptionCount = 1
+    elif info.fightCount < info.absorptionCount:
+        info.fightCount = info.absorptionCount
+    else:
+        info.absorptionCount += 1
+    absorption_rate = info.absorptionCount/info.fightCount
     logger(
         f"目前声骸吸收率为："
         + str(format(absorption_rate * 100, ".2f"))
@@ -2004,7 +2011,7 @@ def ue4_client_crash_monitor(last_timestamp: int) -> int | None:
     try:
         win32gui.SendMessage(ue4_client_crash_hwnd, win32con.WM_CLOSE, 0, 0)
         time.sleep(1)
-        win32gui.SendMessage(hwnd, win32con.WM_CLOSE, 0, 0)
+        hwnd_util.force_close_process(hwnd)
         time.sleep(1)
     except Exception as e:
         logger(f"关闭窗口时发生异常: {e}", "ERROR")

@@ -32,7 +32,6 @@ class Config(BaseModel):
     RestartWutheringWavesTime: int = Field(7200, title="游戏自动重启间隔时间")
     RebootCount: int = Field(0, title="截取窗口失败次数")
     DetectionUE4: bool = Field(True, title="是否检测UE4崩溃")
-    UE4_POPUP: int = Field(30, title="UE4崩溃弹窗检测间隔时间")
 
     # 控制台信息
     EchoDebugMode: bool = Field(True, title="声骸锁定功能DEBUG显示输出的开关")
@@ -81,6 +80,8 @@ class Config(BaseModel):
         ],
         title="大招释放成功时的技能释放顺序",
     )
+    FightOrder: list[int] = Field([1, 2, 3],
+                                  title="战斗顺序，123为角色在编队和战斗策略中的位置，调整可使维里奈在编队3号位也可以先连招")
 
     def __init__(self, **data):
         super().__init__(**data)

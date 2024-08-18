@@ -8,8 +8,7 @@ LogFilePath: # 日志保存路径，留空即为项目根目录，如需设置�
 # 游戏崩溃捕获及处理
 RestartWutheringWaves: false # 定时重启游戏以避免游戏卡10%、75%等特殊进度及UE4崩溃，与DetectionUE4开启任一
 RestartWutheringWavesTime: 7200 # 单位为秒，如7200秒且RestartWutheringWaves为True即两小时重启一次
-DetectionUE4: True # 是否检测UE4崩溃窗口，推荐开启True 
-UE4_POPUP: 30 # UE4崩溃窗口检测的间隔时间，默认30秒检测一次
+DetectionUE4: true # 是否检测UE4崩溃窗口，推荐开启True
 
 # 控制台信息
 EchoDebugMode: true #声骸锁定功能DEBUG显示输出的开关
@@ -45,7 +44,7 @@ FightTacticsUlt: # 大招释放成功时的技能释放顺序，此处只允许�
     - "a(2),e,a(2),e,a(2),e,0.05,a~0.7"   #安可
     - "a(0.3),s,0.2,a(1)"   #维里奈
     # - "e,a(0.8),a,a~0.7"   # 吟霖
-
+FightOrder: [1, 2, 3] # 战斗顺序，123为角色在编队和战斗策略中的位置，调整可使维里奈在编队3号位也可以先连招
 # 云闪之鳞, 辉萤军势, 无常凶鹭, 燎照之骑, 聚械机偶, 哀声鸷, 朔雷之鳞, 鸣钟之龟, 飞廉之猩, 无妄者, 角
 TargetBoss: # 目标BOSS 必须保证目标BOSS的位置是有借位信标的，可以少字但是不能有错别字
     # - "鸣钟之龟"

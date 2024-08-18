@@ -1,7 +1,6 @@
 import time
 
 import init  # !!此导入删除会导致不会将游戏移动到左上角以及提示当前分辨率!!
-import pyautogui
 import threading
 import sys
 import version
@@ -22,22 +21,7 @@ from constant import class_name, window_title
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-hwnds = win32gui.FindWindow("UnrealWindow", "鸣潮")
 app_path = config.AppPath
-# 崩溃的图片，在项目根目录
-IMAGE_NAME_UE4_CRASH = os.path.join(config.project_root, "message.png")
-
-
-# 关闭UE4崩溃弹窗
-def find_and_press_enter():
-    while True:
-        try:
-            x, y = pyautogui.locateCenterOnScreen(IMAGE_NAME_UE4_CRASH, confidence=0.8)
-            if x is not None and y is not None:
-                time.sleep(1)
-                pyautogui.press("enter")
-        except Exception:
-            time.sleep(config.UE4_POPUP)
 
 
 def restart_app(e: Event):
@@ -165,14 +149,17 @@ def run(task: Task, e: Event):
     logger("卡加载监测启动")
     anti_stuck_list = []
     last_anti_stuck_timestamp = int(time.time())
-    logger("UE4崩溃监测启动")
+
     last_check_ue4_timestamp = int(time.time())
+    if config.DetectionUE4:
+        logger("UE4崩溃监测启动")
 
     while e.is_set():
         # 监测UE4-Client Game已崩溃弹窗，发现就关闭弹窗，干掉游戏进程
-        check_timestamp = ue4_client_crash_monitor(last_check_ue4_timestamp)
-        if check_timestamp is not None:
-            last_check_ue4_timestamp = check_timestamp
+        if config.DetectionUE4:
+            check_timestamp = ue4_client_crash_monitor(last_check_ue4_timestamp)
+            if check_timestamp is not None:
+                last_check_ue4_timestamp = check_timestamp
 
         img = screenshot()
         result = ocr(img)
@@ -183,6 +170,9 @@ def run(task: Task, e: Event):
         if check_timestamp is not None:
             last_anti_stuck_timestamp = check_timestamp
     logger("进程停止运行")
+
+
+process_dict = {}
 
 
 def on_press(key):
@@ -199,6 +189,7 @@ def on_press(key):
         logger("启动BOSS脚本")
         thread = Process(target=run, args=(boss_task, taskEvent), name="task")
         thread.start()
+        process_dict["boss_task"] = thread
     if key == Key.f6:
         logger("启动融合脚本")
         try:
@@ -215,9 +206,11 @@ def on_press(key):
         print("")
         thread = Process(target=run, args=(synthesis_task, taskEvent), name="task")
         thread.start()
+        process_dict["synthesis_task"] = thread
     if key == Key.f7:
         logger("暂停脚本")
         taskEvent.clear()
+        force_close_process()
     if key == Key.f8:
         logger("启动锁定脚本")
         mouseResetEvent.set()
@@ -226,6 +219,7 @@ def on_press(key):
         mouse_reset_thread.join()
         thread = Process(target=run, args=(echo_bag_lock_task, taskEvent), name="task")
         thread.start()
+        process_dict["echo_bag_lock_task"] = thread
     if key == Key.f9:
         logger("声骇得分计算启动，请确认当前处于角色声骇详情页","WARN")
         try:
@@ -234,9 +228,6 @@ def on_press(key):
                 "\n         前往顺序为 按下C-> 属性详情-> 声骇-> 点击右侧声骇，请确保处于该页面，否则将无法识别"
                 "\n         目前仅适配1280*720分辨率    回车确认 Enter..."
             )
-                
-        # except:
-        #     pass
         except Exception as e:
             logger(f"发生错误: {e}", "ERROR")
             taskEvent.clear()
@@ -248,12 +239,21 @@ def on_press(key):
     if key == Key.f12:
         logger("请等待程序退出后再关闭窗口...")
         taskEvent.clear()
+        force_close_process()
         mouseResetEvent.set()
         restart_thread.terminate()  # 杀死默认开启状态的检测窗口的线程
-        if config.DetectionUE4:  # 检测UE4窗口崩溃时开启状态的时候，才杀死该线程
-            find_crash_popup_thread.terminate()
         return False
     return None
+
+
+def force_close_process():
+    for cache_thread in process_dict.values():
+        try:
+            cache_thread.terminate()
+            cache_thread.join()
+        except Exception:
+            pass
+    process_dict.clear()
 
 
 # 执行命令行启动任务，todo 多个将异步顺序执行
@@ -300,10 +300,6 @@ if __name__ == "__main__":
     )
     restart_thread.start()
 
-    if config.DetectionUE4:
-        # 创建并启动线程-检查UE4崩溃弹窗
-        find_crash_popup_thread = Process(target=find_and_press_enter)
-        find_crash_popup_thread.start()
     if app_path:
         logger(f"游戏路径：{config.AppPath}")
     else:
