@@ -66,13 +66,14 @@
    | F5  | 开始刷BOSS |
    | F6  | [开始合成声骸](https://github.com/lazydog28/mc_auto_boss/wiki/%E5%A3%B0%E9%AA%B8%E8%9E%8D%E5%90%88%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B)  |
    | F7  | 暂停运行    |
+   | F8  | 锁定声骸    |
    | F12 | 停止运行    |
 
 5. ### 命令行参数
     ```shell
     # 例：使用自定义配置文件启动程序，并在启动后直接打boss
-    python background/main.py -t F5 -c config-add-f.yaml
-    python background/main.py --task=F5 --config=config-add-f.yaml
+    python background/main.py -t F5 -c config-dreamless.yaml
+    python background/main.py --task=F5 --config=config-dreamless.yaml
     ```
    
    | 参数            | 功能              |

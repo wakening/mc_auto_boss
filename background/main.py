@@ -10,7 +10,7 @@ from multiprocessing import Event, Process
 from pynput.keyboard import Key, Listener
 from schema import Task
 import subprocess
-from task import boss_task, synthesis_task, echo_bag_lock_task, compute_task
+from task import boss_task, synthesis_task, echo_bag_lock_task
 from utils import *
 from config import config
 from collections import OrderedDict
@@ -189,7 +189,9 @@ def on_press(key):
         logger("启动BOSS脚本")
         thread = Process(target=run, args=(boss_task, taskEvent), name="task")
         thread.start()
-        process_dict["boss_task"] = thread
+        mouse_reset_thread.start()
+        cache_process_dict("boss_task", thread)
+        cache_process_dict("mouse_reset_thread", mouse_reset_thread)
     if key == Key.f6:
         logger("启动融合脚本")
         try:
@@ -199,58 +201,43 @@ def on_press(key):
             )
         except:
             pass
-        mouseResetEvent.set()
-        time.sleep(1)
-        mouse_reset_thread.terminate()
-        mouse_reset_thread.join()
         print("")
         thread = Process(target=run, args=(synthesis_task, taskEvent), name="task")
         thread.start()
-        process_dict["synthesis_task"] = thread
+        cache_process_dict("synthesis_task", thread)
     if key == Key.f7:
         logger("暂停脚本")
         taskEvent.clear()
         force_close_process()
+        logger("暂停执行完成")
     if key == Key.f8:
         logger("启动锁定脚本")
-        mouseResetEvent.set()
-        time.sleep(1)
-        mouse_reset_thread.terminate()
-        mouse_reset_thread.join()
         thread = Process(target=run, args=(echo_bag_lock_task, taskEvent), name="task")
         thread.start()
-        process_dict["echo_bag_lock_task"] = thread
-    if key == Key.f9:
-        logger("声骇得分计算启动，请确认当前处于角色声骇详情页","WARN")
-        try:
-            input(
-                "\n         计算需要在角色声骇详情页面进行，否则将无法识别"
-                "\n         前往顺序为 按下C-> 属性详情-> 声骇-> 点击右侧声骇，请确保处于该页面，否则将无法识别"
-                "\n         目前仅适配1280*720分辨率    回车确认 Enter..."
-            )
-        except Exception as e:
-            logger(f"发生错误: {e}", "ERROR")
-            taskEvent.clear()
-            mouseResetEvent.set()
-            restart_thread.terminate()  # 杀死默认开启状态的检测窗口的线程
-            sys.exit(1)
-        thread = Process(target=run, args=(compute_task, taskEvent), name="task")
-        thread.start()
+        cache_process_dict("echo_bag_lock_task", thread)
     if key == Key.f12:
         logger("请等待程序退出后再关闭窗口...")
         taskEvent.clear()
+        # logger(str(process_dict))
         force_close_process()
-        mouseResetEvent.set()
-        restart_thread.terminate()  # 杀死默认开启状态的检测窗口的线程
+        restart_thread.terminate()
+        restart_thread.join()
         return False
     return None
 
 
-def force_close_process():
-    for cache_thread in process_dict.values():
+def cache_process_dict(k, v):
+    if k in process_dict and process_dict[k] is not None:
+        return
+    process_dict[k] = v
+
+
+def force_close_process(name: str = None, timeout: float = 3.0):
+    for key, cache_process in process_dict.items():
         try:
-            cache_thread.terminate()
-            cache_thread.join()
+            if name is None or key == name:
+                cache_process.terminate()
+                cache_process.join(timeout)
         except Exception:
             pass
     process_dict.clear()
@@ -294,7 +281,6 @@ if __name__ == "__main__":
     mouse_reset_thread = Process(
         target=mouse_reset, args=(mouseResetEvent,), name="mouse_reset"
     )
-    mouse_reset_thread.start()
     restart_thread = Process(
         target=restart_app, args=(taskEvent,), name="restart_event"
     )
