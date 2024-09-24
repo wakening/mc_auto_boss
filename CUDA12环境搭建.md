@@ -1,7 +1,7 @@
 1. ### 下载本项目
     安装git，打开cmd或powershell执行以下命令下载项目
     ```shell
-    git clone https://github.com/lazydog28/mc_auto_boss.git
+    git clone https://github.com/wakening/mc_auto_boss.git
     cd mc_auto_boss
     ```
 2. ### 安装 python 3.10.x
