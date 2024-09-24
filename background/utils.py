@@ -7,6 +7,8 @@
 """
 import re
 import time
+
+import cv2
 import win32gui
 import win32ui
 import os
@@ -609,13 +611,23 @@ def search_text(results: List[OcrResult], target: str) -> OcrResult | None:
     return None
 
 
-def find_text(targets: str | list[str]) -> OcrResult | None:
+def find_text(targets: str | list[str], position: Position = None, need_scale_factor: bool = False) -> OcrResult | None:
     if isinstance(targets, str):
         targets = [targets]
     img = screenshot()
     if img is None:
         return None
-    result = ocr(img)
+    if position is not None:
+        image = img[position.y1:position.y2, position.x1:position.x2]
+        if need_scale_factor:
+            y_offset = abs(position.y1 - position.y2)
+            max_y_offset = 150
+            pic_scale_factor = int(max_y_offset / y_offset) + 1 if y_offset <= max_y_offset else 1
+            if pic_scale_factor > 1:
+                new_size = (image.shape[1] * pic_scale_factor, image.shape[0] * pic_scale_factor)
+                # 双线性插值
+                img = cv2.resize(image, new_size, interpolation=cv2.INTER_LINEAR)
+    result = ocr(img, position)
     for target in targets:
         if text_info := search_text(result, target):
             return text_info
@@ -696,9 +708,6 @@ def wait_home(timeout=120) -> bool:
 
 def turn_to_search() -> int | None:
     x = None
-    time.sleep(
-        3
-    )  # 增加延时以及搜索次数以避免boss死亡连招未结束导致前几轮次搜索不生效(ArcS17)
     for i in range(5):
         if i == 0:
             control.activate()
@@ -722,6 +731,9 @@ def absorption_action():
     info.needAbsorption = False
     if config.CharacterHeal:
         info.checkHeal = True
+    time.sleep(2)
+    if absorption_and_receive_rewards({}):
+        return
     x = turn_to_search()
     if x is None:
         return
@@ -735,7 +747,7 @@ def absorption_action():
         absorption_max_time = 20
     last_x = None
     while (
-        datetime.now() - start_time
+            datetime.now() - start_time
     ).seconds < absorption_max_time:  # 未超过最大吸收时间
         img = screenshot()
         x = search_echoes(img)
@@ -758,6 +770,7 @@ def absorption_action():
             for i in range(4):
                 forward()
                 time.sleep(0.1)
+        time.sleep(0.5)
         if absorption_and_receive_rewards({}):
             break
 
@@ -1234,21 +1247,14 @@ def echo_bag_lock():
         return False
 
     # 识别声骸Cost
-    this_echo_cost = None
-    # 先检测cost 4
-    if find_pic(
-        1690, 200, 1830, 240, f"COST4{info.adaptsResolution}.png", 0.98, img, False
-    ):
-        this_echo_cost = "4"
-    elif find_pic(
-        1690, 200, 1830, 240, f"COST1{info.adaptsResolution}.png", 0.98, img, False
-    ):
-        this_echo_cost = "1"
-    elif find_pic(
-        1690, 200, 1830, 240, f"COST3{info.adaptsResolution}.png", 0.98, img, False
-    ):
-        this_echo_cost = "3"
-
+    cost_position = Position(
+        x1=int(real_w * 0.93229),
+        y1=int(real_h * 0.193518),
+        x2=int(real_w * 0.948958),
+        y2=int(real_h * 0.218518)
+    )
+    ocr_result = find_text(["1", "2", "3", "4"], cost_position, True)
+    this_echo_cost = None if ocr_result is None else ocr_result.text
     if this_echo_cost is None:
         logger("未能识别到Cost", "ERROR")
         return False
@@ -1514,41 +1520,14 @@ def echo_synthesis():
     is_synthesis_debug = False  # Debug打印开关
 
     def check_echo_cost():
-        this_synthesis_echo_cost = None
-        cost_img = screenshot()
-        if find_pic(
-            1090,
-            210,
-            1240,
-            295,
-            f"合成_COST1{info.adaptsResolution}.png",
-            0.98,
-            cost_img,
-            False,
-        ):
-            this_synthesis_echo_cost = "1"
-        if find_pic(
-            1075,
-            195,
-            1240,
-            295,
-            f"合成_COST3{info.adaptsResolution}.png",
-            0.98,
-            cost_img,
-            False,
-        ):
-            this_synthesis_echo_cost = "3"
-        if find_pic(
-            1075,
-            195,
-            1240,
-            295,
-            f"合成_COST4{info.adaptsResolution}.png",
-            0.98,
-            cost_img,
-            False,
-        ):
-            this_synthesis_echo_cost = "4"
+        cost_position = Position(
+            x1=int(real_w * 0.6172),
+            y1=int(real_h * 0.2037),
+            x2=int(real_w * 0.6375),
+            y2=int(real_h * 0.2287)
+        )
+        ocr_result = find_text(["1", "2", "3", "4"], cost_position, True)
+        this_synthesis_echo_cost = None if ocr_result is None else ocr_result.text
         if this_synthesis_echo_cost is None:
             logger("未能识别到Cost", "ERROR")
             raise Exception(
@@ -2030,3 +2009,34 @@ def close_window(class_name: str = "UnrealWindow", window_title: str = "鸣潮  
             return True
     return False
 
+
+def synthesis_data_bank_action():
+    click_position(
+        Position(
+            x1=int(real_w * 0.015625),
+            y1=int(real_h * 0.51852),
+            x2=int(real_w * 0.0625),
+            y2=int(real_h * 0.58333)
+        )
+    )
+    return True
+
+
+def echo_bag_lock_open_bag_action():
+    adapts()
+    control.tap("b")
+    time.sleep(3)
+    coordinate = find_pic(
+        0,
+        0,
+        int(real_w * 0.11),
+        int(real_h),
+        f"BAG_ECHO{info.adaptsResolution}.png",
+        0.5,
+        need_resize=False,
+    )
+    if not coordinate:
+        logger("识别背包声骸图标失败", "WARN")
+        return False
+    click_position(coordinate)
+    return True

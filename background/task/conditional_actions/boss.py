@@ -5,6 +5,7 @@
 @time: 2024/6/5 下午1:46
 @author SuperLazyDog
 """
+import time
 
 from status import Status
 from schema import ConditionalAction
@@ -21,8 +22,9 @@ def judgment_absorption_action():
     return True
 
 
-# 战斗完成 吸收
+# 战斗完成 等待搜索声骸 吸收
 def judgment_absorption() -> bool:
+    time.sleep(0.1)
     return (
             config.MaxIdleTime / 2
             < (datetime.now() - info.lastFightTime).seconds

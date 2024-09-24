@@ -1,0 +1,12 @@
+pynput
+opencv-python
+pywin32
+pillow
+numpy==1.26.4
+setuptools
+pyyaml
+pydantic
+paddleocr<2.8.0
+colorama
+requests
+psutil

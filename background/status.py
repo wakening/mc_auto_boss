@@ -63,6 +63,9 @@ class StatusInfo(BaseModel):
     synthesisGoldQuantity: int = Field(0, title="合成声骸数量")
     synthesisTimes: int = Field(0, title="声骸合成次数")
     inSpecSynthesisEchoQuantity: int = Field(0, title="合成的符合配置的声骸数量")
+    needOpenDataMerge: bool = Field(True, title="是否要打开数据融合")
+    dataMergeFinish: bool = Field(False, title="数据融合是否完成")
+    bagIsOpen: bool = Field(False, title="背包是否打开")
 
     def resetTime(self):
         self.fightTime = datetime.now()

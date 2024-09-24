@@ -51,8 +51,8 @@ def find_game_windows(e: Event):
             logger("自动启动BOSS脚本")
             # 增加重启线程延时避免重启游戏加载过程中仍无法截取游戏窗口(ArcS17)
             time.sleep(10)
-            thread = Process(target=run, args=(boss_task, e), name="task")
-            thread.start()
+            process = Process(target=run, args=(boss_task, e), name="task")
+            process.start()
         else:
             # 检查到游戏窗口
             # 这段代码的功能是检查一个名为 "isCrashes.txt" 的文件是否存在于项目的根目录下。
@@ -108,8 +108,8 @@ def manage_application(e: Event):
                 # 如果重启成功，执行方法一
                 time.sleep(20)
                 logger("自动启动BOSS脚本")
-                thread = Process(target=run, args=(boss_task, e), name="task")
-                thread.start()
+                process = Process(target=run, args=(boss_task, e), name="task")
+                process.start()
                 break
             else:
                 # 如果关闭失败，检查窗口是否还存在
@@ -172,10 +172,14 @@ def run(task: Task, e: Event):
     logger("进程停止运行")
 
 
-process_dict = {}
-
-
 def on_press(key):
+    try:
+        key_str = str(key.name).upper()
+        if process_dict.get(key_str) is not None and process_dict.get(key_str).is_alive():
+            logger(f"{key_str}已启动，不可重复执行")
+            return None
+    except Exception:
+        pass
     """
     F5 启动BOSS脚本
     F6 启动融合脚本
@@ -187,44 +191,49 @@ def on_press(key):
     """
     if key == Key.f5:
         logger("启动BOSS脚本")
-        thread = Process(target=run, args=(boss_task, taskEvent), name="task")
-        thread.start()
-        mouse_reset_thread = Process(target=mouse_reset, args=(mouseResetEvent,), name="mouse_reset")
-        mouse_reset_thread.start()
-        cache_process_dict("boss_task", thread)
-        cache_process_dict("mouse_reset_thread", mouse_reset_thread)
+        process = Process(target=run, args=(boss_task, taskEvent), name="task")
+        process.start()
+        cache_process_dict(key_str, process)
+        mouse_reset_process = Process(target=mouse_reset, args=(mouseResetEvent,), name="mouse_reset")
+        mouse_reset_process.start()
+        cache_process_dict("mouse_reset_process", mouse_reset_process)
     if key == Key.f6:
         logger("启动融合脚本")
-        try:
-            input(
-                "启动融合脚本之前请确保已锁定现有的有用声骸，并确认使用已适配分辨率：\n  1920*1080分辨率1.0缩放\n  1600*900分辨率1.0缩放\n  1368*768分辨率1.0缩放\n  "
-                "1280*720分辨率1.5缩放\n  1280*720分辨率1.0缩放\n  回车确认 Enter..."
-            )
-        except:
-            pass
-        print("")
-        thread = Process(target=run, args=(synthesis_task, taskEvent), name="task")
-        thread.start()
-        cache_process_dict("synthesis_task", thread)
+        logger("启动融合脚本之前请确保已锁定现有的有用声骸，并确认使用已适配分辨率：\n  1920*1080分辨率1.0缩放\n  1600*900分辨率1.0缩放\n  1368*768分辨率1.0缩放\n  "
+               "1280*720分辨率1.5缩放\n  1280*720分辨率1.0缩放\n")
+        process = Process(target=run, args=(synthesis_task, taskEvent), name="task")
+        process.start()
+        cache_process_dict(key_str, process)
+        mouse_reset_process = Process(target=mouse_reset, args=(mouseResetEvent,), name="mouse_reset")
+        mouse_reset_process.start()
+        cache_process_dict("mouse_reset_process", mouse_reset_process)
     if key == Key.f7:
         logger("暂停脚本")
         taskEvent.clear()
         mouseResetEvent.clear()
         force_close_process()
+        time.sleep(1)
         logger("暂停执行完成")
     if key == Key.f8:
         logger("启动锁定脚本")
-        thread = Process(target=run, args=(echo_bag_lock_task, taskEvent), name="task")
-        thread.start()
-        cache_process_dict("echo_bag_lock_task", thread)
+        process = Process(target=run, args=(echo_bag_lock_task, taskEvent), name="task")
+        process.start()
+        cache_process_dict(key_str, process)
+        mouse_reset_process = Process(target=mouse_reset, args=(mouseResetEvent,), name="mouse_reset")
+        mouse_reset_process.start()
+        cache_process_dict("mouse_reset_process", mouse_reset_process)
     if key == Key.f12:
         logger("请等待程序退出后再关闭窗口...")
         taskEvent.clear()
         mouseResetEvent.clear()
+        cmd_event.set()
         # logger(str(process_dict))
         force_close_process()
-        restart_thread.terminate()
-        restart_thread.join()
+        restart_process.terminate()
+        restart_process.join()
+        time.sleep(3)
+        logger("程序退出完成")
+        time.sleep(0.3)
         return False
     return None
 
@@ -239,6 +248,8 @@ def force_close_process(name: str = None, timeout: float = 3.0):
     for key, cache_process in process_dict.items():
         try:
             if name is None or key == name:
+                if not cache_process.is_alive():
+                    continue
                 cache_process.terminate()
                 cache_process.join(timeout)
         except Exception:
@@ -246,7 +257,7 @@ def force_close_process(name: str = None, timeout: float = 3.0):
     process_dict.clear()
 
 
-# 执行命令行启动任务，todo 多个将异步顺序执行
+# 执行命令行启动任务，多个将异步顺序执行
 def run_cmd_tasks_async():
     cmd_task_dict = get_cmd_task_opts()
     if cmd_task_dict is None:
@@ -259,33 +270,46 @@ def run_cmd_tasks_async():
         for key_str, keyboard in cmd_task_dict.items():
             on_press(keyboard)
         return
-    # 异步 todo F12中断线程
-    cmd_task_thread = threading.Thread(target=cmd_task_func, args=(cmd_task_dict,))
+    # 异步
+    cmd_task_thread = threading.Thread(target=cmd_task_func, args=(cmd_event, cmd_task_dict))
     # 守护线程
     cmd_task_thread.daemon = True
     cmd_task_thread.start()
 
 
-def cmd_task_func(cmd_task_dict: OrderedDict[str, Key]):
+def cmd_task_func(cmd_event: threading.Event, cmd_task_dict: OrderedDict[str, Key]):
     # print(str(cmd_task_dict))
-    for key_str, keyboard in cmd_task_dict.items():
+    # logger(f"任务线程启动: {cmd_task_dict.keys()}")
+    task_size = len(cmd_task_dict)
+    for i, (key_str, keyboard) in enumerate(cmd_task_dict.items()):
+        # logger(f"i: {i}, size: {task_size}")
         on_press(keyboard)
+        if i == task_size - 1:
+            break
         # 一键锁定合成刷声骸
-        # python background/main.py -t F8,F6,F5 -c config-add-f.yaml
-        # todo 暂时只支持单个命令，需等其他功能适配
-        # todo F8目前得在背包声骸界面才生效，缺少自动传送到安全点（朔雷右侧），自动打开背包选中声骸栏，进程结束告知执行完
-        # todo F6目前得在声骸合成界面才生效，缺少自动传送到安全点（朔雷右侧），自动打开数据坞选中数据融合，进程结束告知执行完
-        break
+        # python background/main.py -t F8,F6,F5 -c config-dreamless.yaml
+        while not cmd_event.is_set():
+            # logger(f"{str(process_dict)}")
+            # logger(f"执行: {key_str}")
+            process = process_dict.get(key_str)
+            if process is None or process.is_alive():
+                # logger("等待")
+                time.sleep(5)
+                continue
+            exitcode = process.exitcode
+            if exitcode != 0:
+                logger(f"任务{key_str}未正常结束, 返回码: {exitcode}", "WARN")
+            break
+        on_press(Key.f7)
+        time.sleep(3)
+    # logger("线程结束")
 
 
 if __name__ == "__main__":
     taskEvent = Event()  # 用于停止任务线程
     mouseResetEvent = Event()  # 用于停止鼠标重置线程
-    restart_thread = Process(
-        target=restart_app, args=(taskEvent,), name="restart_event"
-    )
-    restart_thread.start()
-
+    restart_process = Process(target=restart_app, args=(taskEvent,), name="restart_event")
+    restart_process.start()
     if app_path:
         logger(f"游戏路径：{config.AppPath}")
     else:
@@ -303,7 +327,9 @@ if __name__ == "__main__":
         "使用说明：\n   F5  启动脚本\n   F6  合成声骸\n   F7  暂停运行\n   F8  锁定声骸\n   F12 停止运行"
     )
     logger("开始运行")
+    process_dict: dict[str, Process] = {}
+    cmd_event = threading.Event()
     run_cmd_tasks_async()
     with Listener(on_press=on_press) as listener:
         listener.join()
-    print("结束运行")
+    logger("结束运行")

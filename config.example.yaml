@@ -1,5 +1,7 @@
 # 脚本基础配置
-AppPath: # 游戏路径，如需设置，使用"\\"而不是"\" ,留空为从注册表读取游戏运行目录，无法读取注册表，且此值为空时无法在崩溃时自动重启游戏。
+AppPath: # 游戏路径，默认留空，从注册表读取游戏运行目录，为最后一个安装的游戏，若安装了多个版本的游戏，需指定具体版本，则需填上游戏路径，
+         # 路径使用"\\"而不是"\" , 若无法读取注册表，且此值为空时无法在崩溃时自动重启游戏。
+         # 例：AppPath: D:\\Wuthering Waves\\Wuthering Waves Game\\Wuthering Waves.exe
 ModelName: "yolo" # 默认无需设置，已实现自动匹配声骸模型
 OcrInterval: 0 # OCR识别间隔时间
 GameMonitorTime: 5 # 游戏窗口检测间隔时间
