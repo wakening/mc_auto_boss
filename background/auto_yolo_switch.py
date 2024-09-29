@@ -57,6 +57,7 @@ def model_boss_yolo(bossName: str):
             or bossName == "无常凶鹭"
             or bossName == "辉萤军势"
             or bossName == "聚械机偶"
+            or bossName == "无归的谬误"
     ) and config.ModelName != defaultModelName:
         user_default_model()  # 其他Boss，使用默认的yolo模型
 

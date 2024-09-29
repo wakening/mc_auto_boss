@@ -184,7 +184,7 @@ fight_page = Page(
     targetTexts=[
         TextMatch(
             name="战斗",
-            text=template(r"(击败|对战)"),  # 使用正则表达式匹配 支持击败和对战
+            text=template(r"(击败|对战|泰缇斯系统)"),  # 使用正则表达式匹配 支持击败和对战
         ),
     ],
     action=fight_action,

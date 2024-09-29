@@ -216,11 +216,15 @@ def confirm_leave_action(positions: dict[str, Position]) -> bool:
     :param positions: 位置信息
     :return:
     """
-    click_position(positions["确认"])
-    time.sleep(3)
-    wait_home()
-    logger(f"{info.lastBossName}副本结束")
-    time.sleep(2)
+    if len(config.TargetBoss) == 1 and config.TargetBoss[0] in ["无妄者", "角"]:
+        click_position(positions["重新挑战"])
+        logger(f"重新挑战{info.lastBossName}副本")
+    else:
+        click_position(positions["确认"])
+        time.sleep(3)
+        wait_home()
+        logger(f"{info.lastBossName}副本结束")
+        time.sleep(2)
     if info.lastBossName == "角":
         info.inJue = False
     else:
@@ -241,6 +245,10 @@ confirm_leave_page = Page(
         TextMatch(
             name="确认",
             text=template("^确认$"),
+        ),
+        TextMatch(
+            name="重新挑战",
+            text=template("重新挑战"),
         ),
     ],
     action=confirm_leave_action,

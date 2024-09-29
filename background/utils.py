@@ -319,21 +319,11 @@ def transfer_to_boss(bossName):
     click_position(findBoss.position)
     click_position(findBoss.position)
     time.sleep(1)
-    # control.click(1700 * width_ratio, 980 * height_ratio)
     random_click(1700, 980)
-    if not wait_text("追踪", timeout=5):
-        logger("未找到追踪", "WARN")
-        control.esc()
-        return False
-    # control.click(960 * width_ratio, 540 * height_ratio)
-    random_click(960, 540)
-    beacon = wait_text("借位信标", timeout=5)
-    if not beacon:
-        logger("未找到借位信标", "WARN")
-        control.esc()
-        return False
-    click_position(beacon.position)
-    if transfer := wait_text("快速旅行", timeout=5):
+    time.sleep(3)
+    random_click(1750, 1010)
+    time.sleep(1)
+    if transfer := wait_text("确认", timeout=5):
         click_position(transfer.position)
         time.sleep(0.5)
         logger("等待传送完成")
@@ -371,8 +361,8 @@ def transfer_to_dreamless():
     click_position(findBoss.position)
     click_position(findBoss.position)
     time.sleep(1)
-    random_click(1720, 460)
-    # control.click(1720 * width_ratio, 420 * height_ratio)
+    random_click(1720, 465)
+    time.sleep(2)
     if transfer := wait_text("快速旅行"):
         click_position(transfer.position)
         logger("等待传送完成")

@@ -2,6 +2,12 @@ __version__ = "1.2.6"
 release_date = "2024-08-18"
 description = "更新"
 
+# ver1.3.0
+# update:2024-09-29
+# updated by wakening
+# 1.支持新boss无归的谬误
+# 2.修复不能打boss的bug，无妄者、角在单刷时支持重新挑战
+
 # ver1.2.7
 # update:2024-09-24
 # updated by wakening
