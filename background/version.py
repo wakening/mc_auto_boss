@@ -1,5 +1,5 @@
-__version__ = "1.2.6"
-release_date = "2024-08-18"
+__version__ = "1.3.0"
+release_date = "2024-09-29"
 description = "更新"
 
 # ver1.3.0
