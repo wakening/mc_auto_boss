@@ -1783,9 +1783,9 @@ def is_echo_main_status_valid(
         if this_echo_cost in echo_set_config:
             if this_echo_name and this_echo_name_key:
                 this_echo_config = echo_set_config.get(this_echo_name_key, {}).get(this_echo_name)
-                if this_echo_config:
+                if this_echo_config is not None:
                     final_echo_config = this_echo_config
-                    logger(f"{this_echo_name}使用自定义配置", "DEBUG")
+                    # logger(f"{this_echo_name}使用自定义配置", "DEBUG")
             return (
                     this_echo_main_status in final_echo_config
             )
