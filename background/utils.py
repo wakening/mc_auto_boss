@@ -426,7 +426,7 @@ def transfer() -> bool:
     time.sleep(1)
     if not wait_text(
         ["日志", "活跃", "挑战", "强者", "残象", "周期", "探寻", "漂泊"], timeout=7
-    ):  
+    ):
         logger("未进入索拉指南", "WARN")
         control.esc()
         info.lastFightTime = datetime.now()
@@ -440,37 +440,6 @@ def transfer() -> bool:
     else:
         info.bossIndex += 1
         return transfer_to_boss(bossName)
-
-
-# boss传送跳过动画 by wakening
-def rumi_transfer_rumi(boss_index) -> bool:
-    bossName = config.TargetBoss[boss_index % len(config.TargetBoss)]
-    control.activate()
-    time.sleep(3)
-    control.tap("m")
-    time.sleep(1)
-    random_click(960, 540)
-    beacon = wait_text("借位信标", timeout=5)
-    if not beacon:
-        logger("未找到借位信标", "WARN")
-        control.esc()
-        return False
-    click_position(beacon.position)
-    if transfer := wait_text("快速旅行", timeout=5):
-        click_position(transfer.position)
-        time.sleep(0.5)
-        logger("等待传送完成")
-        wait_home()  # 等待回到主界面
-        logger("传送完成")
-        now = datetime.now()
-        info.idleTime = now  # 重置空闲时间
-        info.lastFightTime = now  # 重置最近检测到战斗时间
-        info.fightTime = now  # 重置战斗时间
-        info.lastBossName = bossName
-        info.waitBoss = True
-        return True
-    control.esc()
-    return False
 
 
 def screenshot() -> np.ndarray | None:
@@ -846,7 +815,7 @@ def transfer_to_heal(healBossName: str = "朔雷之鳞"):
         return False
     # 首次进行治疗时先进行地图缩放 From Rin
     region = set_region(1625, 895, 1885, 1050)
-    if info.healCount == 0: 
+    if info.healCount == 0:
         i = 0
         while not wait_text_designated_area("自定义标记", region=region):
             random_click(960, 300)
@@ -862,7 +831,7 @@ def transfer_to_heal(healBossName: str = "朔雷之鳞"):
             control.scroll(3, 960 * width_ratio, 540 * height_ratio)
             time.sleep(0.2)
             logger("正在对地图进行缩放","DEBUG")
-        time.sleep(0.5)  
+        time.sleep(0.5)
     # control.click(1210 * width_ratio, 525 * height_ratio)
     random_click(1210, 525)
     if transfer := wait_text("快速旅行"):
@@ -1047,8 +1016,8 @@ def random_click(
         # 将浮点数坐标转换为整数像素坐标
         if ratio:
             # 需要缩放
-            random_x = int(random_x) * width_ratio
-            random_y = int(random_y) * height_ratio
+            random_x = int(random_x * width_ratio)
+            random_y = int(random_y * height_ratio)
         else:
             # 不需要缩放
             random_x = int(random_x)
@@ -1087,11 +1056,8 @@ def boss_wait(bossName):
         return False
 
     if contains_any_combinations(bossName, keywords_turtle, min_chars=2):
-        # logger("龟龟需要等待16秒开始战斗！", "DEBUG")
-        tst = int(time.time())
-        trans_success = rumi_transfer_rumi(info.bossIndex - 1)
-        if not trans_success:
-            time.sleep(max(0, 16 - int(time.time()) + tst))
+        logger("龟龟需要等待16秒开始战斗！", "DEBUG")
+        time.sleep(16)
     elif contains_any_combinations(bossName, keywords_robot, min_chars=2):
         logger("机器人需要等待7秒开始战斗！", "DEBUG")
         time.sleep(7)
@@ -1175,11 +1141,11 @@ def echo_bag_lock():
             "WARN",
         )
         time.sleep(3)
-        # 切换到时间顺序(倒序)
         logger("切换为时间倒序")
-        random_click(400, 990)  # 调整点击位置以适配窗口模式下的1920*1080分辨率(ArcS17)
+        random_click(430, 984)
         time.sleep(1)
-        random_click(400, 860)
+        text_sort_time = find_text("获得时间顺序")
+        click_position(text_sort_time.position)
         time.sleep(0.5)
         random_click(718, 23)
         time.sleep(0.5)
@@ -1251,21 +1217,29 @@ def echo_bag_lock():
     if config.EchoDebugMode:
         logger(f"当前声骸Cost为{this_echo_cost}", "DEBUG")
 
-    this_echo_cost_key = this_echo_cost + "COST"
+    # 识别声骸名称 850  65      1120   127
+    echo_name_position = Position(
+        x1=int(real_w * 0.664),
+        y1=int(real_h * 0.09),
+        x2=int(real_w * 0.875),
+        y2=int(real_h * 0.1763889)
+    )
+    # cost4_name_array = ["辉萤军势", "燎照之骑", "云闪之鳞", "朔雷之鳞", "飞廉之猩", "角", "哀声鸷", "无妄者", "无冠者", "无归的谬误", "鸣钟之龟", "无常凶鹭", "聚械机偶" ]
+    cost4_name_mapping = {"哀声": "哀声鸷"}
+    echo_name_ocr_result = find_text([".*"], echo_name_position, True)
+    this_echo_name_temp = None if echo_name_ocr_result is None else echo_name_ocr_result.text
+    if this_echo_name_temp is None:
+        logger("未能识别到声骸名称", "ERROR")
+        return False
+    this_echo_name = cost4_name_mapping.get(this_echo_name_temp, this_echo_name_temp)
+    # if this_echo_cost == "4" and this_echo_name not in cost4_name_array:
+    #     logger(f"识别到的声骸名称有错字: {this_echo_name}", "ERROR")
+    #     return False
+    if config.EchoDebugMode:
+        logger(f"当前声骸名称为: {this_echo_name}", "DEBUG")
 
-    # 当配置文件每个套装的这个cost值需要的词条一条也没写，即都不需要，直接跳过，不检测主词条
-    this_echo_cost_not_in_echo_config = True
-    for cost_config_dict in config.EchoLockConfig.values():
-        this_echo_cost_not_in_echo_config &= (
-            len(cost_config_dict.get(this_echo_cost_key)) == 0
-        )
-    if this_echo_cost_not_in_echo_config:
-        if config.EchoDebugMode:
-            logger(f"[Cost {this_echo_cost}]声骸都不需要，下一个", "DEBUG")
-        echo_next_row(info.echoNumber)
-        # 等一会，防止太快来不及挪到下一个
-        time.sleep(0.3)
-        return True
+    this_echo_cost_key = this_echo_cost + "COST"
+    this_echo_name_key = this_echo_cost + "COST_ECHO"
 
     # 识别声骸主词条属性
     if this_echo_cost == "4":  # 4COST描述太长，可能将副词条识别为主词条
@@ -1331,31 +1305,6 @@ def echo_bag_lock():
         logger(f"声骸主词条识别错误", "ERROR")
         return False
 
-    # 每个套装都不需要这个cost对应的主属性，直接跳过，不检测套装属性
-    echo_main_is_not_exist_in_all_set = True
-    # 每个套装都需要这个cost对应的主属性，直接锁定，不检测套装属性
-    echo_main_is_exist_in_all_set = True
-    for cost_config_dict in config.EchoLockConfig.values():
-        echo_main_is_not_exist_in_all_set &= (
-            this_echo_main_status not in cost_config_dict.get(this_echo_cost_key)
-        )
-        echo_main_is_exist_in_all_set &= this_echo_main_status in cost_config_dict.get(
-            this_echo_cost_key
-        )
-    if echo_main_is_not_exist_in_all_set:
-        if config.EchoDebugMode:
-            logger(f"主属性[{str(this_echo_main_status)}]都不需要，下一个", "DEBUG")
-        echo_next_row(info.echoNumber)
-        return True
-    if echo_main_is_exist_in_all_set:
-        if config.EchoDebugMode:
-            logger(f"主属性[{str(this_echo_main_status)}]都需要，直接锁定", "DEBUG")
-        info.inSpecEchoQuantity += 1
-        click_position(coordinate_unlock)
-        time.sleep(0.5)
-        echo_next_row(info.echoNumber)
-        return True
-
     # 识别声骸套装属性
     region = set_region(1295, 430, 1850, 930)
     text_result = wait_text_designated_area(echo.echoSetName, 2, region, 5)
@@ -1403,7 +1352,7 @@ def echo_bag_lock():
     )
     # 锁定声骸，输出声骸信息
     if is_echo_main_status_valid(
-        this_echo_set, this_echo_cost_key, this_echo_main_status, config.EchoLockConfig
+        this_echo_set, this_echo_cost_key, this_echo_main_status, config.EchoLockConfig, this_echo_name, this_echo_name_key
     ):
         if this_echo_lock is True:
             if config.EchoDebugMode:
@@ -1826,12 +1775,19 @@ def wait_text_result_search(text_result):
 
 
 def is_echo_main_status_valid(
-    this_echo_set, this_echo_cost, this_echo_main_status, echo_lock_config
+    this_echo_set, this_echo_cost, this_echo_main_status, echo_lock_config, this_echo_name=None, this_echo_name_key=None
 ):
     if this_echo_set in echo_lock_config:
-        if this_echo_cost in echo_lock_config[this_echo_set]:
+        echo_set_config = echo_lock_config[this_echo_set]
+        final_echo_config = echo_set_config[this_echo_cost]
+        if this_echo_cost in echo_set_config:
+            if this_echo_name and this_echo_name_key:
+                this_echo_config = echo_set_config.get(this_echo_name_key, {}).get(this_echo_name)
+                if this_echo_config:
+                    final_echo_config = this_echo_config
+                    logger(f"{this_echo_name}使用自定义配置", "DEBUG")
             return (
-                this_echo_main_status in echo_lock_config[this_echo_set][this_echo_cost]
+                    this_echo_main_status in final_echo_config
             )
     return False
 

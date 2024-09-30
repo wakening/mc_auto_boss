@@ -176,10 +176,12 @@ if config.EchoLock:
             echo_set_dict = config.EchoLockConfig.get(echo_set_name)
             if echo_set_dict is None:
                 echo_set_dict = {}
-                config.EchoLockConfig[echo_set_name] = echo_set_dict
-            if len(echo_set_dict) == 0:
                 for cost in echo_model.echoCost:
                     echo_set_dict[cost + "COST"] = []
+            for cost in echo_model.echoCost:
+                if not echo_set_dict.get(cost + "COST_ECHO"):
+                    echo_set_dict[cost + "COST_ECHO"] = {}
+            config.EchoLockConfig[echo_set_name] = echo_set_dict
         # print("\n" + str(config.EchoLockConfig))
     else:
         print("缺少声骸配置文件，请复制example文件进行配置，目标文件路径：%s" % echo_config_path)
