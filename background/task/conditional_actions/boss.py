@@ -19,6 +19,8 @@ def judgment_absorption_action():
         absorption_action()
     else:
         forward()
+    if config.CharacterHeal:
+        check_heal()
     return True
 
 

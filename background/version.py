@@ -1,13 +1,14 @@
 __version__ = "1.3.1"
-release_date = "2024-09-30"
+release_date = "2024-10-01"
 description = "更新"
 
 # ver1.3.1
-# update:2024-09-30
+# update:2024-10-01
 # updated by wakening
 # 1.修复F8声骸锁定不能用的bug
 # 2.增加功能，F8声骸锁定支持识别声骸名称，4C声骸支持每种单独配置词条，详见echo_config.example.yaml，兼容旧版
 # 3.移除龟龟快打，原地传送跳过起身等待时间已被修复
+# 4.优化复活，无感快速检测，复活点改为今州城，只有声骸正好掉在脚下时不会触发
 
 ## ver1.3.0
 # update:2024-09-29

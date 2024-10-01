@@ -29,7 +29,6 @@ from schema import Position
 from datetime import datetime
 from yolo import search_echoes
 from echo import echo
-from caculate import calculate_total_weight
 
 
 def interactive():
@@ -319,11 +318,21 @@ def transfer_to_boss(bossName):
     click_position(findBoss.position)
     click_position(findBoss.position)
     time.sleep(1)
-    random_click(1700, 980)
-    time.sleep(3)
-    random_click(1750, 1010)
+    # random_click(1700, 980)
+    detection_text = wait_text("^探测$", timeout=2)
+    if not detection_text:
+        control.esc()
+        return False
+    click_position(detection_text.position)
+    time.sleep(2)
+    # random_click(1750, 1010)
+    go_text = wait_text("^前往$", timeout=2)
+    if not go_text:
+        control.esc()
+        return False
+    click_position(go_text.position)
     time.sleep(1)
-    if transfer := wait_text("确认", timeout=5):
+    if transfer := wait_text("^确认$", timeout=5):
         click_position(transfer.position)
         time.sleep(0.5)
         logger("等待传送完成")
@@ -386,18 +395,13 @@ def transfer_to_dreamless():
 
 def transfer() -> bool:
     if config.CharacterHeal:
-        check_heal()
-        if not info.needHeal:  # 检查是否需要治疗
-            logger("无需治疗")
-        else:
-            # healBossName = "朔雷之鳞"  # 固定目标boss名称
-            logger("开始治疗")
+        # logger(f"info.needHeal: {info.needHeal}", "DEBUG")
+        if info.needHeal:  # 检查是否需要治疗
+            logger("有角色阵亡，开始治疗")
             time.sleep(1)
             info.lastBossName = "治疗"
-            control.activate()
-            control.tap(win32con.VK_F2)
-            time.sleep(1)
             transfer_to_heal()
+
     bossName = config.TargetBoss[info.bossIndex % len(config.TargetBoss)]
 
     if info.lastBossName == "无妄者" and bossName == "无妄者":
@@ -432,9 +436,7 @@ def transfer() -> bool:
         info.lastFightTime = datetime.now()
         return False
     time.sleep(1)
-    if info.needHeal:
-        transfer_to_heal()
-    elif bossName == "无妄者":
+    if bossName == "无妄者":
         info.bossIndex += 1
         return transfer_to_dreamless()
     else:
@@ -774,106 +776,53 @@ def absorption_and_receive_rewards(positions: dict[str, Position]) -> bool:
     return True
 
 
-def transfer_to_heal(healBossName: str = "朔雷之鳞"):
-    """
-    如果需要治疗，传送到固定位置进行治疗。
-    """
-    coordinate = find_pic(template_name="残象探寻.png", threshold=0.5)
-    if not coordinate:
-        logger("识别残像探寻失败", "WARN")
+def transfer_to_heal():
+    control.activate()
+    control.tap("m")
+    time.sleep(2)
+    toggle_map = find_text("切换地图")
+    if not toggle_map:
         control.esc()
+        logger("未找到切换地图")
         return False
-    click_position(coordinate)  # 进入残像探寻
-    if not wait_text("探测"):
-        logger("未进入残象探寻", "WARN")
-        control.esc()
-        return False
-    findBoss = None
-    y = 133
-    while y < 907:
-        y = y + 30
-        if y > 907:
-            y = 907
-        findBoss = find_text(healBossName)
-        if findBoss:
-            break
-        # control.click(855 * width_ratio, y * height_ratio)
-        random_click(855, y)
-        time.sleep(0.3)
-    if not findBoss:
-        control.esc()
-        logger("治疗_未找到神像附近点位BOSS(朔雷之鳞)", "WARN")
-        return False
-    click_position(findBoss.position)
-    click_position(findBoss.position)
-    time.sleep(1)
-    # control.click(1700 * width_ratio, 980 * height_ratio)
-    random_click(1700, 980)
-    if not wait_text("追踪"):
-        logger("治疗_未找到追踪", "WARN")
-        control.esc()
-        return False
-    # 首次进行治疗时先进行地图缩放 From Rin
-    region = set_region(1625, 895, 1885, 1050)
-    if info.healCount == 0:
-        i = 0
-        while not wait_text_designated_area("自定义标记", region=region):
-            random_click(960, 300)
-            time.sleep(0.5)
-            i += 1
-            if i > 3:
-                for _ in range(2):
-                    control.esc()
-                    time.sleep(0.5)
-                logger("地图缩放时出现问题，退出地图界面", "DEBUG")
-                return
-        for _ in range(5):
-            control.scroll(3, 960 * width_ratio, 540 * height_ratio)
-            time.sleep(0.2)
-            logger("正在对地图进行缩放","DEBUG")
-        time.sleep(0.5)
-    # control.click(1210 * width_ratio, 525 * height_ratio)
-    random_click(1210, 525)
-    if transfer := wait_text("快速旅行"):
-        click_position(transfer.position)
-        logger("治疗_等待传送完成")
-        time.sleep(3)
-        wait_home()  # 等待回到主界面
-        logger("治疗_传送完成")
-        now = datetime.now()
-        info.idleTime = now  # 重置空闲时间
-        info.lastFightTime = now  # 重置最近检测到战斗时间
-        info.fightTime = now  # 重置战斗时间
-        info.needHeal = False
-        info.healCount += 1
-        return True
-    control.esc()
+    tmp_x = (toggle_map.position.x1 + toggle_map.position.x2) // 2
+    tmp_y = toggle_map.position.y1 - 5
+    random_click(tmp_x, tmp_y, ratio=False)
+    if jzc_text := wait_text("今州城"):
+        click_position(jzc_text.position)
+        time.sleep(2)
+        jzcj_text = wait_text("今州城界")
+        tmp_x = jzcj_text.position.x1 - 5
+        tmp_y = jzcj_text.position.y1 - 40
+        random_click(tmp_x, tmp_y, ratio=False)
+        time.sleep(2)
+        if transfer := wait_text("快速旅行"):
+            click_position(transfer.position)
+            logger("治疗_等待传送完成")
+            time.sleep(3)
+            wait_home()  # 等待回到主界面
+            logger("治疗_传送完成")
+            now = datetime.now()
+            info.idleTime = now  # 重置空闲时间
+            info.lastFightTime = now  # 重置最近检测到战斗时间
+            info.fightTime = now  # 重置战斗时间
+            info.needHeal = False
+            info.healCount += 1
+            return True
     return False
 
-
 def check_heal():
-    if info.checkHeal:
-        logger(f"正在检查角色是否需要复苏。")
-        for i in range(3):
-            if info.needHeal:
-                break
-            now = datetime.now()
-            info.lastSelectRoleTime = now
-            info.roleIndex += 1
-            if info.roleIndex > 3:
-                info.roleIndex = 1
-            control.tap(str(info.roleIndex))
-            region = set_region(325, 190, 690, 330)
-            if not wait_text_designated_area("复苏", timeout=3, region=region):
-                logger(f"{info.roleIndex}号角色无需复苏")
-                info.needHeal = False
-                time.sleep(1)
-            else:
-                logger(f"{info.roleIndex}号角色需要复苏")
-                info.needHeal = True
-                control.esc()
-        info.checkHeal = False
-
+    # logger(f"info.roleIndex: {info.roleIndex}")
+    for i in range(3):
+        role_index = (info.roleIndex + i) % 3
+        # logger(f"role_index: {role_index}")
+        control.tap(str(role_index + 1))
+        time.sleep(0.5)
+    region = set_region(325, 190, 690, 330)
+    if wait_text_designated_area("复苏", timeout=2, region=region):
+        # logger(f"检测到角色需要复苏")
+        info.needHeal = True
+        control.esc()
 
 def wait_text_designated_area(
     targets: str | list[str],
@@ -1045,6 +994,7 @@ def boss_wait(bossName):
     keywords_robot = ["聚", "械", "机", "偶"]
     keywords_dreamless = ["无", "妄", "者"]
     keywords_jue = ["角"]
+    keywords_fallacy = ["无", "归", "的", "谬", "误"]
 
     def contains_any_combinations(
         name, keywords, min_chars
@@ -1059,7 +1009,7 @@ def boss_wait(bossName):
         logger("龟龟需要等待16秒开始战斗！", "DEBUG")
         time.sleep(16)
     elif contains_any_combinations(bossName, keywords_robot, min_chars=2):
-        logger("机器人需要等待7秒开始战斗！", "DEBUG")
+        logger("聚械机偶需要等待7秒开始战斗！", "DEBUG")
         time.sleep(7)
     elif contains_any_combinations(bossName, keywords_dreamless, min_chars=3):
         logger(f"无妄者需要等待{config.BossWaitTime_Dreamless}秒开始战斗！", "DEBUG")
@@ -1067,6 +1017,9 @@ def boss_wait(bossName):
     elif contains_any_combinations(bossName, keywords_jue, min_chars=1):
         logger(f"角需要等待{config.BossWaitTime_Jue}秒开始战斗！", "DEBUG")
         time.sleep(config.BossWaitTime_Jue)
+    elif contains_any_combinations(bossName, keywords_fallacy, min_chars=3):
+        logger(f"无归的谬误需要等待{config.BossWaitTime_fallacy}秒开始战斗！", "DEBUG")
+        time.sleep(config.BossWaitTime_fallacy)
     else:
         logger("当前BOSS可直接开始战斗！", "DEBUG")
 
