@@ -788,6 +788,8 @@ def transfer_to_heal():
     tmp_x = (toggle_map.position.x1 + toggle_map.position.x2) // 2
     tmp_y = toggle_map.position.y1 - 5
     random_click(tmp_x, tmp_y, ratio=False)
+    huanglong_text = wait_text("瑝?珑")
+    click_position(huanglong_text.position)
     if jzc_text := wait_text("今州城"):
         click_position(jzc_text.position)
         time.sleep(2)
