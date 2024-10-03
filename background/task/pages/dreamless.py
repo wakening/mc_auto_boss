@@ -173,42 +173,6 @@ start_challenge_page = Page(
 pages.append(start_challenge_page)
 
 
-# 离开
-def leave_action(positions: dict[str, Position]) -> bool:
-    """
-    离开
-    :param positions: 位置信息
-    :return:
-    """
-    if info.needAbsorption and config.SearchDreamlessEchoes:
-        absorption_action()
-    else:
-        absorption_and_receive_rewards({})
-    control.esc()
-    time.sleep(1)
-    return True
-
-
-leave_page = Page(
-    name="离开",
-    targetTexts=[
-        TextMatch(
-            name="离开",
-            text="离开",
-        ),
-    ],
-    excludeTexts=[
-        TextMatch(
-            name="确认",
-            text="确认",
-        ),
-    ],
-    action=leave_action,
-)
-
-pages.append(leave_page)
-
-
 # 确认离开
 def confirm_leave_action(positions: dict[str, Position]) -> bool:
     """
@@ -216,11 +180,12 @@ def confirm_leave_action(positions: dict[str, Position]) -> bool:
     :param positions: 位置信息
     :return:
     """
-    if len(config.TargetBoss) == 1 and config.TargetBoss[0] in ["无妄者", "角"]:
+    if len(config.TargetBoss) == 1 and config.TargetBoss[0] in ["无妄者", "角"] and not info.needHeal:
         click_position(positions["重新挑战"])
         logger(f"重新挑战{info.lastBossName}副本")
     else:
-        click_position(positions["确认"])
+        pos = positions.get("确认", positions.get("退出副本"))
+        click_position(pos)
         time.sleep(3)
         wait_home()
         logger(f"{info.lastBossName}副本结束")
@@ -248,13 +213,35 @@ confirm_leave_page = Page(
         ),
         TextMatch(
             name="重新挑战",
-            text=template("重新挑战"),
+            text=template("^重新挑战$"),
         ),
     ],
     action=confirm_leave_action,
 )
 
 pages.append(confirm_leave_page)
+
+
+confirm_material_page = Page(
+    name="收取物资",
+    targetTexts=[
+        TextMatch(
+            name="收取物资次数已达到上限",
+            text="收取物资次数已达到上限",
+        ),
+        TextMatch(
+            name="退出副本",
+            text=template("^退出副本$"),
+        ),
+        TextMatch(
+            name="重新挑战",
+            text=template("^重新挑战$"),
+        ),
+    ],
+    action=confirm_leave_action,
+)
+
+pages.append(confirm_material_page)
 
 
 # 结晶波片不足

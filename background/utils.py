@@ -785,7 +785,7 @@ def transfer_to_heal():
         control.esc()
         logger("未找到切换地图")
         return False
-    tmp_x = (toggle_map.position.x1 + toggle_map.position.x2) // 2
+    tmp_x = int((toggle_map.position.x1 + toggle_map.position.x2) // 2)
     tmp_y = toggle_map.position.y1 - 5
     random_click(tmp_x, tmp_y, ratio=False)
     huanglong_text = wait_text("瑝?珑")

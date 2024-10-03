@@ -55,6 +55,8 @@ def absorption_action(positions: dict[str, Position]) -> bool:
     interactive()
     time.sleep(2)
     info.needAbsorption = False
+    if config.CharacterHeal:
+        check_heal()
     return True
 
 
