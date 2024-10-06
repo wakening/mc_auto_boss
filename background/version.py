@@ -1,11 +1,12 @@
 __version__ = "1.3.2"
-release_date = "2024-10-03"
+release_date = "2024-10-06"
 description = "更新"
 
 # ver1.3.2
-# update:2024-10-03
+# update:2024-10-06
 # updated by wakening
 # 1.修复无妄者物资领取上限后卡在领取弹窗无法离开的bug
+# 2.优化复活点击地图时增加延时和点击次数，防止卡顿等导致传送失败
 
 # ver1.3.1
 # update:2024-10-01

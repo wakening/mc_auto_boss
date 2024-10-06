@@ -394,13 +394,11 @@ def transfer_to_dreamless():
 
 
 def transfer() -> bool:
-    if config.CharacterHeal:
-        # logger(f"info.needHeal: {info.needHeal}", "DEBUG")
-        if info.needHeal:  # 检查是否需要治疗
-            logger("有角色阵亡，开始治疗")
-            time.sleep(1)
-            info.lastBossName = "治疗"
-            transfer_to_heal()
+    if config.CharacterHeal and info.needHeal:  # 检查是否需要治疗
+        logger("有角色阵亡，开始治疗")
+        time.sleep(1)
+        info.lastBossName = "治疗"
+        transfer_to_heal()
 
     bossName = config.TargetBoss[info.bossIndex % len(config.TargetBoss)]
 
@@ -790,9 +788,14 @@ def transfer_to_heal():
     random_click(tmp_x, tmp_y, ratio=False)
     huanglong_text = wait_text("瑝?珑")
     click_position(huanglong_text.position)
+    time.sleep(0.5)
+    click_position(huanglong_text.position)
+    time.sleep(1.5)
     if jzc_text := wait_text("今州城"):
         click_position(jzc_text.position)
-        time.sleep(2)
+        time.sleep(0.5)
+        click_position(jzc_text.position)
+        time.sleep(1.5)
         jzcj_text = wait_text("今州城界")
         tmp_x = jzcj_text.position.x1 - 5
         tmp_y = jzcj_text.position.y1 - 40
