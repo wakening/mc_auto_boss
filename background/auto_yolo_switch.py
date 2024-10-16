@@ -53,7 +53,7 @@ def model_boss_yolo(bossName: str):
             or bossName == "云闪之鳞"
             or bossName == "燎照之骑"
             or bossName == "飞廉之猩"
-            or bossName == "袁声鸷"
+            or bossName == "哀声鸷"
             or bossName == "无常凶鹭"
             or bossName == "辉萤军势"
             or bossName == "聚械机偶"

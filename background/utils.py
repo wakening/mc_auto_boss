@@ -319,20 +319,23 @@ def transfer_to_boss(bossName):
     click_position(findBoss.position)
     time.sleep(1)
     # random_click(1700, 980)
-    detection_text = wait_text("^探测$", timeout=2)
+    detection_text = wait_text("^探测$", timeout=5)
     if not detection_text:
         control.esc()
         return False
+    time.sleep(1)
     click_position(detection_text.position)
-    time.sleep(2)
+    time.sleep(3)
     # random_click(1750, 1010)
-    go_text = wait_text("^前往$", timeout=2)
+    go_text = wait_text("^前往$", timeout=5)
     if not go_text:
         control.esc()
         return False
+    time.sleep(1)
     click_position(go_text.position)
     time.sleep(1)
     if transfer := wait_text("^确认$", timeout=5):
+        time.sleep(0.5)
         click_position(transfer.position)
         time.sleep(0.5)
         logger("等待传送完成")
@@ -375,7 +378,7 @@ def transfer_to_dreamless():
     if transfer := wait_text("快速旅行"):
         click_position(transfer.position)
         logger("等待传送完成")
-        time.sleep(0.5)
+        time.sleep(2)
         wait_home()  # 等待回到主界面
         logger("传送完成")
         time.sleep(2)
@@ -676,7 +679,18 @@ def turn_to_search() -> int | None:
         x = search_echoes(img)
         if x is not None:
             break
-        if i == 4:  # 如果尝试了4次都未发现声骸，直接返回
+        if i == 4:  # 如果尝试了4次都未发现声骸
+            # 可能掉在正前方被人物挡住，前进一下再最后看一次
+            for i in range(4):
+                forward()
+                time.sleep(0.1)
+            control.tap("a")
+            control.tap("a")
+            time.sleep(0.3)
+            img = screenshot()
+            x = search_echoes(img)
+            if x is not None:
+                break
             return
         logger("未发现声骸,转动视角")
         control.tap("a")
@@ -750,7 +764,7 @@ def absorption_and_receive_rewards(positions: dict[str, Position]) -> bool:
         count += 1
         interactive()
         time.sleep(2)
-        if find_text("确认"):
+        if find_text(["确认", "收取物资"]):
             logger("点击到领取奖励，关闭页面")
             control.esc()
             time.sleep(2)
@@ -1884,7 +1898,7 @@ def anti_stuck_monitor(img, anti_stuck_list: list, last_timestamp: int) -> int |
 def ue4_client_crash_monitor(last_timestamp: int) -> int | None:
     now_timestamp = int(time.time())
     # 隔一段时间(秒)收集一次
-    if now_timestamp - last_timestamp < 60:
+    if now_timestamp - last_timestamp < 20:
         return None
     ue4_client_crash_hwnd = hwnd_util.get_ue4_client_crash_hwnd()
     if ue4_client_crash_hwnd is None:
@@ -1944,3 +1958,6 @@ def echo_bag_lock_open_bag_action():
         return False
     click_position(coordinate)
     return True
+
+def need_retry():
+    return len(config.TargetBoss) == 1 and config.TargetBoss[0] in ["无妄者", "角"]

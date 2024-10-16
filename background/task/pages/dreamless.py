@@ -37,11 +37,25 @@ enter_page_dreamless = Page(
             name="无冠者之像",
             text="无冠者之像",
         ),
+        TextMatch(
+            name="进入|离开",
+            # 进入是在外面F进入副本页面；
+            # 离开是在无妄者副本内战斗结束时，用于游戏闪退重启后直接在副本内触发切换模型
+            text=template(r"(进入|离开)"),
+        ),
     ],
     excludeTexts=[
         TextMatch(
             name="确认",
             text="确认",
+        ),
+        TextMatch(
+            name="快速旅行",
+            text="快速旅行",
+        ),
+        TextMatch(
+            name="领取奖励",
+            text="领取奖励",
         ),
     ],
     action=enter_action_dreamless,
@@ -180,9 +194,18 @@ def confirm_leave_action(positions: dict[str, Position]) -> bool:
     :param positions: 位置信息
     :return:
     """
-    if len(config.TargetBoss) == 1 and config.TargetBoss[0] in ["无妄者", "角"] and not info.needHeal:
+    if need_retry() and not info.needHeal:
         click_position(positions["重新挑战"])
         logger(f"重新挑战{info.lastBossName}副本")
+        time.sleep(4)
+        if info.lastBossName == "角":
+            info.inJue = True
+        else:
+            info.inDreamless = True
+        info.status = Status.idle
+        now = datetime.now()
+        info.lastFightTime = now
+        info.fightTime = now
     else:
         pos = positions.get("确认", positions.get("退出副本"))
         click_position(pos)
@@ -190,13 +213,13 @@ def confirm_leave_action(positions: dict[str, Position]) -> bool:
         wait_home()
         logger(f"{info.lastBossName}副本结束")
         time.sleep(2)
-    if info.lastBossName == "角":
-        info.inJue = False
-    else:
-        info.inDreamless = False
-    info.status = Status.idle
-    now = datetime.now()
-    info.lastFightTime = now + timedelta(seconds=config.MaxFightTime / 2)
+        if info.lastBossName == "角":
+            info.inJue = False
+        else:
+            info.inDreamless = False
+        info.status = Status.idle
+        now = datetime.now()
+        info.lastFightTime = now + timedelta(seconds=config.MaxFightTime / 2)
     return True
 
 
@@ -220,28 +243,6 @@ confirm_leave_page = Page(
 )
 
 pages.append(confirm_leave_page)
-
-
-confirm_material_page = Page(
-    name="收取物资",
-    targetTexts=[
-        TextMatch(
-            name="收取物资次数已达到上限",
-            text="收取物资次数已达到上限",
-        ),
-        TextMatch(
-            name="退出副本",
-            text=template("^退出副本$"),
-        ),
-        TextMatch(
-            name="重新挑战",
-            text=template("^重新挑战$"),
-        ),
-    ],
-    action=confirm_leave_action,
-)
-
-pages.append(confirm_material_page)
 
 
 # 结晶波片不足

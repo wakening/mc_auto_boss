@@ -113,6 +113,10 @@ def exit_instance(positions: dict[str, Position]) -> bool:
     :param positions:
     :return:
     """
+    result = find_text("重新挑战")
+    if result is not None and need_retry():
+        click_position(result.position)
+        return True
     position = positions.get("退出副本", None)
     if position is None:
         return False
@@ -151,7 +155,11 @@ terminal_page = Page(
     targetTexts=[
         TextMatch(
             name="终端",
-            text="终端",
+            text=template("^终端$"),
+        ),
+        TextMatch(
+            name="生日",
+            text="生日",
         ),
     ],
     action=terminal_action,

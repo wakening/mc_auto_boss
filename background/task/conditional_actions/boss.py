@@ -43,6 +43,7 @@ conditional_actions.append(judgment_absorption_condition_action)
 
 # 超过最大空闲时间
 def judgment_idle() -> bool:
+    time.sleep(0.1)
     return (
             datetime.now() - info.lastFightTime
     ).seconds > config.MaxIdleTime and not info.inDreamless and not info.inJue
@@ -63,6 +64,7 @@ conditional_actions.append(judgment_idle_conditional_action)
 
 # 超过最大战斗时间
 def judgment_fight() -> bool:
+    time.sleep(0.1)
     return (
             datetime.now() - info.fightTime
     ).seconds > config.MaxFightTime and not info.inDreamless and not info.inJue
@@ -84,6 +86,7 @@ conditional_actions.append(judgment_fight_conditional_action)
 
 
 def judgment_leave() -> bool:
+    time.sleep(0.1)
     return (
             datetime.now() - info.lastFightTime
     ).seconds > config.MaxIdleTime and (info.inDreamless or info.inJue)
