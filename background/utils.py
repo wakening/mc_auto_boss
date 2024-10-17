@@ -1113,9 +1113,10 @@ def echo_bag_lock():
             "WARN",
         )
         time.sleep(3)
+        control.activate()
         logger("切换为时间倒序")
         random_click(430, 984)
-        time.sleep(1)
+        time.sleep(2)
         text_sort_time = find_text("获得时间顺序")
         click_position(text_sort_time.position)
         time.sleep(0.5)
@@ -1942,6 +1943,7 @@ def synthesis_data_bank_action():
 
 def echo_bag_lock_open_bag_action():
     adapts()
+    control.activate()
     control.tap("b")
     time.sleep(3)
     coordinate = find_pic(
