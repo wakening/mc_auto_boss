@@ -323,6 +323,7 @@ def transfer_to_boss(bossName):
         "梦魇燎照之骑": "梦.*燎照之骑",
         "梦魇哀声鸷": "梦.*哀声鸷?",
         "梦魇辉萤军势": "梦.*辉萤军势",
+        "梦魇凯尔匹": "梦.*凯尔匹",
     }
     find_boss_name_reg = boss_name_reg_mapping.get(bossName, bossName)
     findBoss = None
